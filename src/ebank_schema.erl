@@ -28,7 +28,7 @@
 %%----------------------------------------------------------------------
 
 new(Args) ->
-    #schema{ fields = maps:get(fields, Args) }.
+    #schema{ fields = normalize_fields(maps:get(fields, Args)) }.
 
 fields(#schema{fields = Fields}) ->
     Fields.
@@ -47,3 +47,12 @@ get_field_value(Name, Record, Schema) ->
 
 set_field_value(Name, Value, Record, Schema) ->
     ebank_records:set_value(field_index(Name, Schema), Value, Record).
+
+%%----------------------------------------------------------------------
+%% INTERNAL FUNCTIONS
+%%----------------------------------------------------------------------
+
+normalize_fields(Fields) ->
+    maps:map(fun(Name, Defs) ->
+        ebank_field:new(Defs#{name => Name})
+    end, Fields).

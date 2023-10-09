@@ -112,9 +112,9 @@ all() ->
 schema() ->
     ebank_schema:new(#{
         fields => #{
-            name => ebank_field:new(#{
+            name => #{
                 index => #user.name
-            })
+            }
         }
     }).
 

@@ -36,7 +36,7 @@
 
 new(Args) ->
     #model{ module = maps:get(module, Args)
-          , schema = maps:get(schema, Args)
+          , schema = ebank_schema:new(maps:get(schema, Args))
           }.
 
 module(#model{module = Module}) ->
