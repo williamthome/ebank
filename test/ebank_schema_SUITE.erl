@@ -16,7 +16,7 @@
 
 %% Test cases
 -export([ fields_name/1
-        , field_by_name/1
+        , field/1
         , field_index/1
         , get_field_value/1
         , set_field_value/1
@@ -99,7 +99,7 @@ end_per_testcase(_Case, _Config) ->
 %%              are to be executed.
 %%----------------------------------------------------------------------
 all() ->
-    [ fields_name, field_by_name, field_index, get_field_value
+    [ fields_name, field, field_index, get_field_value
     , set_field_value
     ].
 
@@ -129,9 +129,9 @@ fields_name(_Config) ->
         end, ebank_schema:fields_name(schema())),
     ok.
 
-field_by_name(_Config) ->
+field(_Config) ->
     ebank_field:new(#{ index => #user.name }) =:=
-        ebank_schema:field_by_name(name, schema()),
+        ebank_schema:field(name, schema()),
     ok.
 
 field_index(_Config) ->

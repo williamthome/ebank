@@ -4,7 +4,7 @@
 -export([ new/1
         , fields/1
         , fields_name/1
-        , field_by_name/2
+        , field/2
         , field_index/2
         , get_field_value/3
         , set_field_value/4
@@ -36,11 +36,11 @@ fields(#schema{fields = Fields}) ->
 fields_name(Schema) ->
     maps:keys(fields(Schema)).
 
-field_by_name(Name, Schema) ->
+field(Name, Schema) ->
     maps:get(Name, fields(Schema)).
 
 field_index(Name, Schema) ->
-    ebank_field:index(field_by_name(Name, Schema)).
+    ebank_field:index(field(Name, Schema)).
 
 get_field_value(Name, Record, Schema) ->
     ebank_records:get_value(field_index(Name, Schema), Record).

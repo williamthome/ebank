@@ -6,7 +6,7 @@
         , schema/1
         , fields/1
         , fields_name/1
-        , field_by_name/2
+        , field/2
         , field_index/2
         , get_field_value/3
         , set_field_value/4
@@ -51,8 +51,8 @@ fields(Model) ->
 fields_name(Model) ->
     ebank_schema:fields_name(schema(Model)).
 
-field_by_name(Name, Model) ->
-    ebank_schema:field_by_name(Name, schema(Model)).
+field(Name, Model) ->
+    ebank_schema:field(Name, schema(Model)).
 
 field_index(Name, Model) ->
     ebank_schema:field_index(Name, schema(Model)).
