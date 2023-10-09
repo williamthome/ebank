@@ -1,35 +1,39 @@
-%%%-------------------------------------------------------------------
-%% @doc ebank top level supervisor.
-%% @end
-%%%-------------------------------------------------------------------
 
 -module(ebank_sup).
 
 -behaviour(supervisor).
 
--export([start_link/0]).
+%% API functions
+-export([ start_link/1 ]).
 
--export([init/1]).
+%% supervisor callbacks
+-export([ init/1 ]).
 
+%% Macros
 -define(SERVER, ?MODULE).
 
-start_link() ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
+%%----------------------------------------------------------------------
+%% API FUNCTIONS
+%%----------------------------------------------------------------------
 
-%% sup_flags() = #{strategy => strategy(),         % optional
-%%                 intensity => non_neg_integer(), % optional
-%%                 period => pos_integer()}        % optional
-%% child_spec() = #{id => child_id(),       % mandatory
-%%                  start => mfargs(),      % mandatory
-%%                  restart => restart(),   % optional
-%%                  shutdown => shutdown(), % optional
-%%                  type => worker(),       % optional
-%%                  modules => modules()}   % optional
-init([]) ->
-    SupFlags = #{strategy => one_for_all,
-                 intensity => 0,
-                 period => 1},
-    ChildSpecs = [],
+start_link(Args) ->
+    supervisor:start_link({local, ?SERVER}, ?MODULE, Args).
+
+%%----------------------------------------------------------------------
+%% SUPERVISOR CALLBACKS
+%%----------------------------------------------------------------------
+
+init(Args) ->
+    SupFlags = #{ strategy => one_for_all
+                , intensity => 0
+                , period => 1
+                },
+
+    DbArgs = maps:get(db, Args),
+    DbSpec = #{ id => ebank_db
+              , start => {ebank_db, start_link, [DbArgs] }
+              },
+
+    ChildSpecs = [ DbSpec ],
+
     {ok, {SupFlags, ChildSpecs}}.
-
-%% internal functions
