@@ -1,7 +1,9 @@
 -module(ebank_model).
 
 %% API functions
--export([ schema/1
+-export([ new/1
+        , module/1
+        , schema/1
         , fields/1
         , fields_name/1
         , field_by_name/2
@@ -11,50 +13,52 @@
         ]).
 
 %% Types
--export_type([ schema/0
-             , field/0
-             ]).
+-export_type([ t/0, schema/0, field/0 ]).
 
--type schema() :: #{ fields => field() }.
+-record(model, { module :: module()
+               , schema :: schema()
+               }).
 
--type field() :: map().
+-opaque t() :: #model{}.
+
+-type schema() :: ebank_schema:t().
+
+-type field() :: ebank_field:t().
 
 %% Callbacks
 -optional_callbacks([]).
 
--callback schema() -> schema().
+-callback model() -> t().
 
 %%----------------------------------------------------------------------
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
 
-schema(Model) ->
-    Model:schema().
+new(Args) ->
+    #model{ module = maps:get(module, Args)
+          , schema = maps:get(schema, Args)
+          }.
+
+module(#model{module = Module}) ->
+    Module.
+
+schema(#model{schema = Schema}) ->
+    Schema.
 
 fields(Model) ->
-    maps:get(fields, schema(Model), #{}).
+    ebank_schema:fields(schema(Model)).
 
 fields_name(Model) ->
-    maps:keys(fields(Model)).
+    ebank_schema:fields_name(schema(Model)).
 
 field_by_name(Name, Model) ->
-    maps:get(Name, fields(Model)).
+    ebank_schema:field_by_name(Name, schema(Model)).
 
 field_index(Name, Model) ->
-    maps:get(index, field_by_name(Name, Model)).
+    ebank_schema:field_index(Name, schema(Model)).
 
 get_field_value(Name, Record, Model) ->
-    get_record_value(field_index(Name, Model), Record).
+    ebank_schema:set_field_value(Name, Record, schema(Model)).
 
 set_field_value(Name, Value, Record, Model) ->
-    set_record_value(field_index(Name, Model), Value, Record).
-
-%%----------------------------------------------------------------------
-%% INTERNAL FUNCTIONS
-%%----------------------------------------------------------------------
-
-get_record_value(Index, Record) ->
-    erlang:element(Index, Record).
-
-set_record_value(Index, Value, Record) ->
-    erlang:setelement(Index, Record, Value).
+    ebank_schema:set_field_value(Name, Value, Record, schema(Model)).

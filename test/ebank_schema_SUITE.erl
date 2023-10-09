@@ -1,6 +1,4 @@
--module(ebank_model_SUITE).
-
--behaviour(ebank_model).
+-module(ebank_schema_SUITE).
 
 % -include_lib("common_test/include/ct.hrl").
 
@@ -13,12 +11,11 @@
         , end_per_testcase/2
         ]).
 
-% ebank_model callbacks
+% ebank_schema callbacks
 -export([ schema/0 ]).
 
 %% Test cases
--export([ fields/1
-        , fields_name/1
+-export([ fields_name/1
         , field_by_name/1
         , field_index/1
         , get_field_value/1
@@ -102,7 +99,7 @@ end_per_testcase(_Case, _Config) ->
 %%              are to be executed.
 %%----------------------------------------------------------------------
 all() ->
-    [ fields, fields_name, field_by_name, field_index, get_field_value
+    [ fields_name, field_by_name, field_index, get_field_value
     , set_field_value
     ].
 
@@ -112,45 +109,41 @@ all() ->
 
 -record(user, { name }).
 
-schema() -> #{
-    fields => #{
-        name => #{
-            index => #user.name
+schema() ->
+    ebank_schema:new(#{
+        fields => #{
+            name => ebank_field:new(#{
+                index => #user.name
+            })
         }
-    }
-}.
+    }).
 
 %%----------------------------------------------------------------------
 %% TEST CASES
 %%----------------------------------------------------------------------
 
-fields(_Config) ->
-    maps:get(fields, schema()) =:=
-        ebank_model:fields(?MODULE),
-    ok.
-
 fields_name(_Config) ->
     true =:=
         lists:all(fun(Name) ->
             lists:member(Name, [name])
-        end, ebank_model:fields_name(?MODULE)),
+        end, ebank_schema:fields_name(schema())),
     ok.
 
 field_by_name(_Config) ->
-    maps:get(name, maps:get(fields, schema())) =:=
-        ebank_model:field_by_name(name, ?MODULE),
+    ebank_field:new(#{ index => #user.name }) =:=
+        ebank_schema:field_by_name(name, schema()),
     ok.
 
 field_index(_Config) ->
-    2 =:= ebank_model:field_index(name, ?MODULE),
+    2 =:= ebank_schema:field_index(name, schema()),
     ok.
 
 get_field_value(_Config) ->
     <<"Joe">> =:=
-        ebank_model:get_field_value(name, #user{name = <<"Joe">>}, ?MODULE),
+        ebank_schema:get_field_value(name, #user{name = <<"Joe">>}, schema()),
     ok.
 
 set_field_value(_Config) ->
     #user{name = <<"Joe">>} =
-        ebank_model:set_field_value(name, <<"Joe">>, #user{}, ?MODULE),
+        ebank_schema:set_field_value(name, <<"Joe">>, #user{}, schema()),
     ok.
