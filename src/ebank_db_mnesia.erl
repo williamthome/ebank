@@ -39,7 +39,7 @@ create_table(Args) ->
                 {read_concurrency, true},
                 {decentralized_counters, true}
             ]} |
-            case maps:get(persist, Args, true) of
+            case maps:get(persist, Args, false) of
                 true ->
                     [{dets, [
                         {auto_save, maps:get(persist_interval, Args)}
