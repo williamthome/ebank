@@ -12,14 +12,21 @@
 %% EBANK_MODEL CALLBACKS
 %%----------------------------------------------------------------------
 
+% @todo: defaults.
+% @todo: expand via parse transform.
 schema() ->
     ebank_schema:new(#{
         table => account,
         fields => #{
             id => #{
                 type => integer,
-                required => true
-                % permitted => false
+                permitted => false,
+                % @todo: only set on insert.
+                default => fun(_Changeset) ->
+                    % @@todo: unique id.
+                    rand:uniform(1_000)
+                end,
+                skip_validation => true
             },
             social_id => #{
                 type => binary,
@@ -33,11 +40,22 @@ schema() ->
             password => #{
                 type => binary,
                 required => true
+            },
+            created_at => #{
+                type => datetime,
+                permitted => false,
+                % @todo: only set on insert.
+                default => fun(Changeset) ->
+                    case changeset:get_change(created_at, Changeset, undefined) of
+                        undefined ->
+                            Now = calendar:universal_time(),
+                            changeset:push_change(created_at, Now, Changeset);
+                        _ ->
+                            Changeset
+                    end
+                end,
+                skip_validation => true
             }
-            % created_at => #{
-            %     type => datetime,
-            %     permitted => false
-            % }
         }
     }).
 

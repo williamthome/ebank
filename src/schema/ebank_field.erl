@@ -8,17 +8,21 @@
         , permitted/1
         , required/1
         , indexed/1
+        , default/1
         ]).
 
 %% Types
 -export_type([ t/0, name/0, index/0 ]).
 
+% @todo: Make sure if the index can be removed.
 -record(field, { name :: atom()
                , index :: index()
                , type :: type()
                , permitted :: boolean()
                , required :: boolean()
                , indexed :: boolean()
+               , default :: term()
+               , skip_validation :: boolean()
                }).
 
 -opaque t() :: #field{}.
@@ -40,6 +44,8 @@ new(Args) ->
           , permitted = maps:get(permitted, Args, true)
           , required = maps:get(required, Args, false)
           , indexed = maps:get(indexed, Args, false)
+          , default = maps:get(default, Args, undefined)
+          , skip_validation = maps:get(skip_validation, Args, false)
           }.
 
 name(#field{name = Name}) ->
@@ -59,3 +65,6 @@ required(#field{required = Required}) ->
 
 indexed(#field{indexed = Indexed}) ->
     Indexed.
+
+default(#field{default = Default}) ->
+    Default.

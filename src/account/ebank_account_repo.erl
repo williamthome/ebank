@@ -9,4 +9,4 @@
 
 insert(Params) ->
     Changeset = ebank_account:changeset(#{}, Params),
-    ebank_repo:insert(Changeset).
+    ebank_repo:insert(Changeset, ebank_account:schema()).

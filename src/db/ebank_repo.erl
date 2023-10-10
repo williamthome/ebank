@@ -1,16 +1,15 @@
 -module(ebank_repo).
 
 %% API functions
--export([ insert/1 ]).
+-export([ insert/2 ]).
 
 %%----------------------------------------------------------------------
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
 
-insert(Changeset) ->
+insert(Changeset, Schema) ->
     case changeset:is_valid(Changeset) of
         true ->
-            Schema = changeset:get_metadata(Changeset),
             Changes = changeset:get_changes(Changeset),
             Record = ebank_schema:to_record(Changes, Schema),
             Table = ebank_schema:table(Schema),
