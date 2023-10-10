@@ -7,6 +7,7 @@
         , type/1
         , permitted/1
         , required/1
+        , indexed/1
         ]).
 
 %% Types
@@ -17,6 +18,7 @@
                , type :: type()
                , permitted :: boolean()
                , required :: boolean()
+               , indexed :: boolean()
                }).
 
 -opaque t() :: #field{}.
@@ -37,6 +39,7 @@ new(Args) ->
           , type = maps:get(type, Args)
           , permitted = maps:get(permitted, Args, true)
           , required = maps:get(required, Args, false)
+          , indexed = maps:get(indexed, Args, false)
           }.
 
 name(#field{name = Name}) ->
@@ -53,3 +56,6 @@ permitted(#field{permitted = Permitted}) ->
 
 required(#field{required = Required}) ->
     Required.
+
+indexed(#field{indexed = Indexed}) ->
+    Indexed.

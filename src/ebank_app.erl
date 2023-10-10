@@ -10,7 +10,7 @@
 %%----------------------------------------------------------------------
 
 start(_StartType, _StartArgs) ->
-    ebank_sup:start_link(ebank:get_env()).
+    ebank_sup:start_link(ebank_env:get_all()).
 
 stop(_State) ->
     ok.

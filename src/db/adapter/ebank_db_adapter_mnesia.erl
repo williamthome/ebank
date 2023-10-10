@@ -1,8 +1,8 @@
--module(ebank_db_mnesia).
+-module(ebank_db_adapter_mnesia).
 
 -feature(maybe_expr, enable).
 
--behaviour(ebank_db).
+-behaviour(ebank_db_adapter).
 
 %% ebank_db callbacks
 -export([ connect/1
@@ -28,7 +28,8 @@ connect(Args) ->
 create_table(Args) ->
     mnesia:create_table(maps:get(name, Args), [
         {type, set},
-        {attributes, maps:get(fields_name, Args)},
+        {record, maps:get(record, Args)},
+        {attributes, maps:get(fields, Args)},
         {index, maps:get(indexes, Args, [])},
         {disc_copies, maps:get(nodes, Args, [node()])},
         {storage_properties, [
