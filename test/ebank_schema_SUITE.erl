@@ -20,6 +20,7 @@
         , field_index/1
         , get_field_value/1
         , set_field_value/1
+        , changeset/1
         ]).
 
 %%----------------------------------------------------------------------
@@ -99,8 +100,12 @@ end_per_testcase(_Case, _Config) ->
 %%              are to be executed.
 %%----------------------------------------------------------------------
 all() ->
-    [ fields_name, field, field_index, get_field_value
+    [ fields_name
+    , field
+    , field_index
+    , get_field_value
     , set_field_value
+    , changeset
     ].
 
 %%----------------------------------------------------------------------
@@ -113,7 +118,10 @@ schema() ->
     ebank_schema:new(#{
         fields => #{
             name => #{
-                index => #user.name
+                index => #user.name,
+                type => binary,
+                required => true,
+                permitted => true
             }
         }
     }).
@@ -152,4 +160,15 @@ get_field_value(_Config) ->
 set_field_value(_Config) ->
     #user{name = <<"Joe">>} =
         ebank_schema:set_field_value(name, <<"Joe">>, #user{}, schema()),
+    ok.
+
+changeset(_Config) ->
+    false = changeset:is_valid(
+        ebank_schema:changeset(#{}, schema())
+    ),
+
+    true = changeset:is_valid(
+        ebank_schema:changeset(#{name => <<"Joe">>}, schema())
+    ),
+
     ok.

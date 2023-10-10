@@ -10,6 +10,8 @@
         , field_index/2
         , get_field_value/3
         , set_field_value/4
+        , changeset/2
+        , changeset/3
         ]).
 
 %% Types
@@ -62,3 +64,9 @@ get_field_value(Name, Record, Model) ->
 
 set_field_value(Name, Value, Record, Model) ->
     ebank_schema:set_field_value(Name, Value, Record, schema(Model)).
+
+changeset(Params, Model) ->
+    changeset(#{}, Params, Model).
+
+changeset(Data, Params, Model) ->
+    ebank_schema:changeset(Data, Params, schema(Model)).

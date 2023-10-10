@@ -8,6 +8,8 @@
         , field_index/2
         , get_field_value/3
         , set_field_value/4
+        , changeset/2
+        , changeset/3
         ]).
 
 %% Types
@@ -48,6 +50,16 @@ get_field_value(Name, Record, Schema) ->
 set_field_value(Name, Value, Record, Schema) ->
     ebank_records:set_value(field_index(Name, Schema), Value, Record).
 
+changeset(Params, Schema) ->
+    changeset(#{}, Params, Schema).
+
+changeset(Data, Params, Schema) ->
+    Fields = normalize_fields_for_changeset(fields(Schema)),
+    {Types, Permitted, Required} = Fields,
+    Changeset = changeset:cast({Data, Types}, Params, Permitted),
+    Pipes = [ changeset:validate_required(Required) ],
+    changeset:pipe(Changeset, Pipes).
+
 %%----------------------------------------------------------------------
 %% INTERNAL FUNCTIONS
 %%----------------------------------------------------------------------
@@ -56,3 +68,17 @@ normalize_fields(Fields) ->
     maps:map(fun(Name, Defs) ->
         ebank_field:new(Defs#{name => Name})
     end, Fields).
+
+normalize_fields_for_changeset(Fields) ->
+    maps:fold(fun(Name, Field, {TypesAcc, PermittedAcc, RequiredAcc}) ->
+        Types = TypesAcc#{Name => ebank_field:type(Field)},
+        Permitted = case ebank_field:permitted(Field) of
+            true -> [Name | PermittedAcc];
+            false -> PermittedAcc
+        end,
+        Required = case ebank_field:required(Field) of
+            true -> [Name | RequiredAcc];
+            false -> RequiredAcc
+        end,
+        {Types, Permitted, Required}
+    end, {#{}, [], []}, Fields).
