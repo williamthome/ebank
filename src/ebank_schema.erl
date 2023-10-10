@@ -15,13 +15,11 @@
 %% Types
 -export_type([ t/0, fields/0, field_name/0 ]).
 
--record(schema, { fields = #{} :: fields() }).
+-record(schema, { fields :: fields() }).
 
 -opaque t() :: #schema{}.
 
--type fields() :: #{
-    field_name() := ebank_fields:t()
-}.
+-type fields() :: #{ field_name() := ebank_fields:t() }.
 
 -type field_name() :: atom().
 
