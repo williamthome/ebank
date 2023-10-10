@@ -123,23 +123,29 @@ schema() ->
 %%----------------------------------------------------------------------
 
 fields_name(_Config) ->
-    true =:=
+    true =
         lists:all(fun(Name) ->
             lists:member(Name, [name])
         end, ebank_schema:fields_name(schema())),
     ok.
 
 field(_Config) ->
-    ebank_field:new(#{ index => #user.name }) =:=
-        ebank_schema:field(name, schema()),
+    Args = #{ name => name
+            , index => #user.name
+            , type => binary
+            , permitted => true
+            , required => true
+            },
+    true =
+        ebank_field:new(Args) =:= ebank_schema:field(name, schema()),
     ok.
 
 field_index(_Config) ->
-    2 =:= ebank_schema:field_index(name, schema()),
+    2 = ebank_schema:field_index(name, schema()),
     ok.
 
 get_field_value(_Config) ->
-    <<"Joe">> =:=
+    <<"Joe">> =
         ebank_schema:get_field_value(name, #user{name = <<"Joe">>}, schema()),
     ok.
 
