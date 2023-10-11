@@ -22,9 +22,15 @@ schema() ->
                 type => integer,
                 permitted => false,
                 % @todo: only set on insert.
-                default => fun(_Changeset) ->
-                    % @@todo: unique id.
-                    rand:uniform(1_000)
+                default => fun(Changeset) ->
+                    case changeset:get_change(created_at, Changeset, undefined) of
+                        undefined ->
+                            % @@todo: unique id.
+                            Id = rand:uniform(1_000),
+                            changeset:push_change(id, Id, Changeset);
+                        _ ->
+                            Changeset
+                    end
                 end,
                 skip_validation => true
             },

@@ -1,10 +1,9 @@
-
 -module(ebank_sup).
 
 -behaviour(supervisor).
 
 %% API functions
--export([ start_link/1 ]).
+-export([ start_link/0 ]).
 
 %% supervisor callbacks
 -export([ init/1 ]).
@@ -16,24 +15,19 @@
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
 
-start_link(Args) ->
-    supervisor:start_link({local, ?SERVER}, ?MODULE, Args).
+start_link() ->
+    supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
 %%----------------------------------------------------------------------
 %% SUPERVISOR CALLBACKS
 %%----------------------------------------------------------------------
 
-init(Args) ->
+init([]) ->
     SupFlags = #{ strategy => one_for_all
                 , intensity => 0
                 , period => 1
                 },
 
-    DbArgs = maps:get(db, Args),
-    DbSpec = #{ id => ebank_db
-              , start => {ebank_db, start_link, [DbArgs] }
-              },
-
-    ChildSpecs = [ DbSpec ],
+    ChildSpecs = [ ],
 
     {ok, {SupFlags, ChildSpecs}}.

@@ -1,86 +1,26 @@
 -module(ebank_db).
 
--behaviour(gen_server).
-
 %% API functions
--export([ start_link/1
-        , connect/1
+-export([ connect/0
         , create_table/1
         , with_transaction/1
         , insert/2
         ]).
 
-%% gen_server callbacks
--export([ init/1
-        , handle_continue/2
-        , handle_call/3
-        , handle_cast/2
-        ]).
-
-%% gen_server state
--record(state, { adapter :: module()
-               , args :: map()
-               }).
+-define(ADAPTER, (ebank_env:get_db(adapter))).
 
 %%----------------------------------------------------------------------
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
 
-start_link(Args) ->
-    Adapter = maps:get(adapter, Args),
-    AdapterArgs = maps:get(args, Args),
-    InitArgs = [Adapter, AdapterArgs],
-    gen_server:start_link({local, ?MODULE}, ?MODULE, InitArgs, []).
-
-connect(Args) ->
-    gen_server:cast(?MODULE, {connect, Args}).
+connect() ->
+    ?ADAPTER:connect(ebank_env:get_db(args)).
 
 create_table(Args) ->
-    gen_server:call(?MODULE, {create_table, Args}).
+    ?ADAPTER:create_table(Args).
 
 with_transaction(Fun) ->
-    gen_server:call(?MODULE, {with_transaction, Fun}).
+    ?ADAPTER:with_transaction(Fun).
 
 insert(Data, Table) ->
-    gen_server:call(?MODULE, {insert, Data, Table}).
-
-%%----------------------------------------------------------------------
-%% GEN_SERVER CALLBACKS
-%%----------------------------------------------------------------------
-
-init([Adapter, Args]) ->
-    State = #state{ adapter = Adapter
-                  , args = Args
-                  },
-    {ok, State, {continue, [Adapter, Args]}}.
-
-% @todo: up tables.
-handle_continue([Adapter, Args], State) ->
-    case Adapter:connect(Args) of
-        ok ->
-            {noreply, State};
-        {error, Reason} ->
-            {stop, Reason, State}
-    end.
-
-handle_call({create_table, Args}, _From, State) ->
-    Adapter = State#state.adapter,
-    Reply = Adapter:create_table(Args),
-    {reply, Reply, State};
-handle_call({with_transaction, Fun}, _From, State) ->
-    Adapter = State#state.adapter,
-    Reply = Adapter:with_transaction(Fun),
-    {reply, Reply, State};
-handle_call({insert, Data, Table}, _From, State) ->
-    Adapter = State#state.adapter,
-    Reply = Adapter:insert(Data, Table),
-    {reply, Reply, State}.
-
-handle_cast({connect, Args}, State) ->
-    Adapter = State#state.adapter,
-    case Adapter:connect(Args) of
-        ok ->
-            {noreply, State};
-        {error, Reason} ->
-            {stop, Reason, State}
-    end.
+    ?ADAPTER:insert(Data, Table).

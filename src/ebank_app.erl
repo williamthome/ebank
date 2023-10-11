@@ -10,7 +10,9 @@
 %%----------------------------------------------------------------------
 
 start(_StartType, _StartArgs) ->
-    ebank_sup:start_link(ebank_env:get_all()).
+    ok = ebank_db:connect(),
+    ok = ebank_repo:create_tables(),
+    ebank_sup:start_link().
 
 stop(_State) ->
     ok.
