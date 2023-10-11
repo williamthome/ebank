@@ -13,11 +13,11 @@ get_value(Index, Record) ->
 set_value(Index, Value, Record) ->
     erlang:setelement(Index, Record, Value).
 
-from_map(Params, MapIterator, Record) ->
+from_map(Params, FieldsName, Record) ->
     list_to_tuple(
         [Record |
-            maps:fold(fun(Field, _, Acc) ->
-                [maps:get(Field, Params, undefined) | Acc]
-            end, [], MapIterator)
+            lists:map(fun(FieldName) ->
+                maps:get(FieldName, Params, undefined)
+            end, FieldsName)
         ]
     ).

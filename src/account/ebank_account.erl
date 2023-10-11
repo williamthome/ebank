@@ -17,8 +17,8 @@
 schema() ->
     ebank_schema:new(#{
         table => account,
-        fields => #{
-            id => #{
+        fields => [
+            {id, #{
                 type => integer,
                 permitted => false,
                 % @todo: only set on insert.
@@ -33,21 +33,21 @@ schema() ->
                     end
                 end,
                 skip_validation => true
-            },
-            social_id => #{
+            }},
+            {social_id, #{
                 type => binary,
                 required => true,
                 indexed => true
-            },
-            name => #{
+            }},
+            {name, #{
                 type => binary,
                 required => true
-            },
-            password => #{
+            }},
+            {password, #{
                 type => binary,
                 required => true
-            },
-            created_at => #{
+            }},
+            {created_at, #{
                 type => datetime,
                 permitted => false,
                 % @todo: only set on insert.
@@ -61,8 +61,8 @@ schema() ->
                     end
                 end,
                 skip_validation => true
-            }
-        }
+            }}
+        ]
     }).
 
 %%----------------------------------------------------------------------

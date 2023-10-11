@@ -4,6 +4,7 @@
 -export([ create_tables/2
         , create_table/2
         , insert/2
+        , fetch/2
         ]).
 
 %%----------------------------------------------------------------------
@@ -45,4 +46,16 @@ insert(Changeset, Schema) ->
             end;
         false ->
             {error, {changeset, Changeset}}
+    end.
+
+fetch(Clause, Schema) ->
+    Table = ebank_schema:table(Schema),
+    FieldsIndexes = ebank_schema:fields_index(Schema),
+    Indexes = #{Table => FieldsIndexes},
+    Get = fun() -> ebank_db:fetch(Clause, Indexes) end,
+    case ebank_db:with_transaction(Get) of
+        {ok, Data} ->
+            {ok, Data};
+        {error, Reason} ->
+            {error, Reason}
     end.

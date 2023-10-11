@@ -3,11 +3,10 @@
 %% API functions
 -export([ new/1
         , table/1
-        , record/1
-        , fields_iterator/1
         , fields/1
         , fields_name/1
         , indexed_fields_name/1
+        , fields_index/1
         , fields_default/1
         , fields_type/1
         , permitted_fields/1
@@ -25,15 +24,12 @@
 -export_type([ t/0, fields/0, field_name/0 ]).
 
 -record(schema, { table :: table()
-                , record :: record()
                 , fields :: fields()
                 }).
 
 -opaque t() :: #schema{}.
 
 -type table() :: ebank_db:table().
-
--type record() :: atom() | table().
 
 -type fields() :: #{ field_name() := ebank_fields:t() }.
 
@@ -45,35 +41,34 @@
 
 new(Args) ->
     #schema{ table = maps:get(table, Args)
-           , record = maps:get(record, Args, maps:get(table, Args))
            , fields = normalize_fields(maps:get(fields, Args))
            }.
 
 table(#schema{table = Table}) ->
     Table.
 
-record(#schema{record = Record}) ->
-    Record.
-
-fields_iterator(#schema{fields = Iterator}) ->
-    Iterator.
-
-fields(#schema{fields = [_|Fields]}) ->
+fields(#schema{fields = Fields}) ->
     Fields.
 
-fields_name(#schema{fields = [Name|_]}) ->
-    Name.
+fields_name(Schema) ->
+    lists:map(fun({Name, _}) -> Name end, fields(Schema)).
 
 indexed_fields_name(Schema) ->
-    maps:fold(fun(Name, Field, Acc) ->
+    lists:filtermap(fun({Name, Field}) ->
         case ebank_field:indexed(Field) of
-            true -> [Name | Acc];
-            false -> Acc
+            true -> {true, Name};
+            false -> false
         end
-    end, [], fields(Schema)).
+    end, fields(Schema)).
+
+fields_index(Schema) ->
+    InitialIndex = 1,
+    element(1, lists:foldl(fun(Name, {Acc, Index}) ->
+        {Acc#{Name => Index}, Index+1}
+    end, {#{}, InitialIndex}, fields_name(Schema))).
 
 fields_default(Schema) ->
-    maps:fold(fun(Name, Field, Acc) ->
+    lists:foldl(fun({Name, Field}, Acc) ->
         case ebank_field:default(Field) of
             undefined -> Acc;
             Default -> Acc#{Name => Default}
@@ -81,28 +76,29 @@ fields_default(Schema) ->
     end, #{}, fields(Schema)).
 
 fields_type(Schema) ->
-    maps:map(fun(_, Field) ->
-        ebank_field:type(Field)
-    end, fields(Schema)).
+    lists:foldl(fun({Name, Field}, Acc) ->
+        Acc#{Name => ebank_field:type(Field)}
+    end, #{}, fields(Schema)).
 
 permitted_fields(Schema) ->
-    maps:fold(fun(Name, Field, Acc) ->
+    lists:filtermap(fun({Name, Field}) ->
         case ebank_field:permitted(Field) of
-            true -> [Name | Acc];
-            false -> Acc
+            true -> {true, Name};
+            false -> false
         end
-    end, [], fields(Schema)).
+    end, fields(Schema)).
 
 required_fields(Schema) ->
-    maps:fold(fun(Name, Field, Acc) ->
+    lists:filtermap(fun({Name, Field}) ->
         case ebank_field:required(Field) of
-            true -> [Name | Acc];
-            false -> Acc
+            true -> {true, Name};
+            false -> false
         end
-    end, [], fields(Schema)).
+    end, fields(Schema)).
 
 field(Name, Schema) ->
-    maps:get(Name, fields(Schema)).
+    {Name, Field} = proplists:lookup(Name, fields(Schema)),
+    Field.
 
 field_index(Name, Schema) ->
     ebank_field:index(field(Name, Schema)).
@@ -128,7 +124,7 @@ changeset(Data, Params, Schema, Pipes) ->
     changeset:pipe(Changeset, Pipes).
 
 to_record(Params, Schema) ->
-    ebank_records:from_map(Params, fields_iterator(Schema), record(Schema)).
+    ebank_records:from_map(Params, fields_name(Schema), table(Schema)).
 
 %%----------------------------------------------------------------------
 %% INTERNAL FUNCTIONS
@@ -151,7 +147,10 @@ pipe_apply_defaults(Defaults) ->
     end.
 
 normalize_fields(Fields) ->
-    maps:iterator(element(1, maps:fold(fun(Name, Args0, {FAcc, I}) ->
-        Args = Args0#{name => Name, index => I},
-        {FAcc#{Name => ebank_field:new(Args)}, I+1}
-    end, {#{}, 2}, Fields)), ordered).
+    lists:reverse(element(1, lists:mapfoldl(fun({Name, Args}, I) ->
+        {normalize_field({Name, Args}, I), I+1}
+    end, 1, Fields))).
+
+normalize_field({Name, Args0}, Index) ->
+    Args = Args0#{name => Name, index => Index},
+    {Name, ebank_field:new(Args)}.
