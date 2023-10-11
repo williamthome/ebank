@@ -48,11 +48,11 @@ insert(Changeset, Schema) ->
             {error, {changeset, Changeset}}
     end.
 
-fetch(Clause, Schema) ->
+fetch(Clauses, Schema) ->
     Table = ebank_schema:table(Schema),
     FieldsIndexes = ebank_schema:fields_index(Schema),
     Indexes = #{Table => FieldsIndexes},
-    Get = fun() -> ebank_db:fetch(Clause, Indexes) end,
+    Get = fun() -> ebank_db:fetch(Clauses, Indexes) end,
     case ebank_db:with_transaction(Get) of
         {ok, Data} ->
             {ok, Data};
