@@ -30,11 +30,12 @@ connect(Args) ->
 
 create_table(Args) ->
     Name = maps:get(name, Args),
+    Record = maps:get(record, Args, Name),
     Fields = maps:get(fields, Args),
     Indexes = maps:get(indexes, Args, []),
     Nodes = maps:get(nodes, Args, [node()]),
     Persist = maps:get(persist, Args, false),
-    do_create_table(Name, Fields, Indexes, Nodes, Persist).
+    do_create_table(Name, Record, Fields, Indexes, Nodes, Persist).
 
 with_transaction(Fun) ->
     normalize_result(mnesia:transaction(Fun)).
@@ -86,8 +87,8 @@ start(Nodes) ->
             {error, {mnesia, {bad_nodes, BadNodes}}}
     end.
 
-do_create_table(Name, Fields, Indexes, Nodes, Persist) ->
-    Result = do_create_table_1(Name, Fields, Indexes, Nodes, Persist),
+do_create_table(Name, Record, Fields, Indexes, Nodes, Persist) ->
+    Result = do_create_table_1(Name, Record, Fields, Indexes, Nodes, Persist),
     case normalize_result(Result) of
         ok ->
             ok;
@@ -97,17 +98,16 @@ do_create_table(Name, Fields, Indexes, Nodes, Persist) ->
             {error, Reason}
     end.
 
-do_create_table_1(Name, Fields, Indexes, Nodes, Persist) ->
+do_create_table_1(Name, Record, Fields, Indexes, Nodes, Persist) ->
     mnesia:create_table(Name, [
         {type, set},
-        % {record, maps:get(record, Args, maps:get(name, Args))},
+        {record_name, Record},
         {attributes, Fields},
         {index, Indexes},
         {disc_copies, Nodes},
         {storage_properties, [
             {ets, [
-                % private,
-                % named_table,
+                {protection, private},
                 {write_concurrency, true},
                 {read_concurrency, true},
                 {decentralized_counters, true}
