@@ -5,14 +5,10 @@
 %% ebank_model callbacks
 -export([ schema/0 ]).
 
-%% API functions
--export([ changeset/2 ]).
-
 %%----------------------------------------------------------------------
 %% EBANK_MODEL CALLBACKS
 %%----------------------------------------------------------------------
 
-% @todo: defaults.
 % @todo: expand via parse transform.
 schema() ->
     ebank_schema:new(#{
@@ -21,9 +17,8 @@ schema() ->
             {id, #{
                 type => integer,
                 permitted => false,
-                % @todo: only set on insert.
                 default => fun(Changeset) ->
-                    case changeset:get_change(created_at, Changeset, undefined) of
+                    case changeset:get_change(id, Changeset, undefined) of
                         undefined ->
                             % @@todo: unique id.
                             Id = rand:uniform(1_000),
@@ -31,8 +26,7 @@ schema() ->
                         _ ->
                             Changeset
                     end
-                end,
-                skip_validation => true
+                end
             }},
             {social_id, #{
                 type => binary,
@@ -50,7 +44,6 @@ schema() ->
             {created_at, #{
                 type => datetime,
                 permitted => false,
-                % @todo: only set on insert.
                 default => fun(Changeset) ->
                     case changeset:get_change(created_at, Changeset, undefined) of
                         undefined ->
@@ -59,15 +52,7 @@ schema() ->
                         _ ->
                             Changeset
                     end
-                end,
-                skip_validation => true
+                end
             }}
         ]
     }).
-
-%%----------------------------------------------------------------------
-%% API FUNCTIONS
-%%----------------------------------------------------------------------
-
-changeset(Data, Params) ->
-    ebank_schema:changeset(Data, Params, schema()).

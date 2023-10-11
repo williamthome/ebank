@@ -8,8 +8,9 @@
 -export([ connect/1
         , create_table/1
         , with_transaction/1
-        , insert/2
-        , fetch/2
+        , abort_transaction/1
+        , read/2
+        , write/2
         ]).
 
 %% API functions
@@ -41,12 +42,15 @@ create_table(Args) ->
 with_transaction(Fun) ->
     normalize_result(mnesia:transaction(Fun)).
 
-insert(Data, Table) ->
-    normalize_result(mnesia:write(Table, Data, write)).
+abort_transaction(Reason) ->
+    mnesia:abort(Reason).
 
-fetch(Clauses, Indexes) ->
+read(Clauses, Indexes) ->
     Query = query(Clauses, Indexes),
     {ok, eval_query(Query)}.
+
+write(Data, Table) ->
+    normalize_result(mnesia:write(Table, Data, write)).
 
 %%----------------------------------------------------------------------
 %% API FUNCTIONS

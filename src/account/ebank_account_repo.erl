@@ -1,24 +1,24 @@
 -module(ebank_account_repo).
 
 %% API functions
--export([ insert/1, get_by_id/1 ]).
+-export([ insert/1, fetch/1, update/2 ]).
 
 %%----------------------------------------------------------------------
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
 
 insert(Params) ->
-    Changeset = ebank_account:changeset(#{}, Params),
-    ebank_repo:insert(Changeset, ebank_account:schema()).
+    ebank_repo:insert_one(Params, ebank_account:schema()).
 
-get_by_id(Id) ->
+fetch(Id) ->
     Table = ebank_schema:table(ebank_account:schema()),
     Clauses = [{{Table, id}, '=:=', Id}],
-    case ebank_repo:fetch(Clauses, ebank_account:schema()) of
-        {ok, [Account]} ->
-            {ok, Account};
-        {ok, []} ->
-            {error, enoent};
+    ebank_repo:fetch_one(Clauses, ebank_account:schema()).
+
+update(Id, Params) ->
+    case fetch(Id) of
+        {ok, Record} ->
+            ebank_repo:update_one(Record, Params, ebank_account:schema());
         {error, Reason} ->
             {error, Reason}
     end.

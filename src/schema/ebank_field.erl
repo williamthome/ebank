@@ -14,7 +14,6 @@
 %% Types
 -export_type([ t/0, name/0, index/0 ]).
 
-% @todo: Make sure if the index can be removed.
 -record(field, { name :: atom()
                , index :: index()
                , type :: type()
@@ -22,7 +21,6 @@
                , required :: boolean()
                , indexed :: boolean()
                , default :: term()
-               , skip_validation :: boolean()
                }).
 
 -opaque t() :: #field{}.
@@ -45,7 +43,6 @@ new(Args) ->
           , required = maps:get(required, Args, false)
           , indexed = maps:get(indexed, Args, false)
           , default = maps:get(default, Args, undefined)
-          , skip_validation = maps:get(skip_validation, Args, false)
           }.
 
 name(#field{name = Name}) ->

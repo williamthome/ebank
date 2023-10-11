@@ -22,12 +22,15 @@
 -callback with_transaction(Fun) -> ok | {error, term()}
     when Fun :: transaction_fun().
 
--callback insert(Data, Table) -> ok | {error, term()}
-    when Data :: data()
-       , Table :: table()
-       .
+-callback abort_transaction(Reason) -> no_return()
+    when Reason :: {error, term()}.
 
--callback fetch(Clauses, Indexes) -> ok | {error, term()}
+-callback read(Clauses, Indexes) -> ok | {error, term()}
     when Clauses :: [clause()]
        , Indexes :: indexes()
+       .
+
+-callback write(Data, Table) -> ok | {error, term()}
+    when Data :: data()
+       , Table :: table()
        .
