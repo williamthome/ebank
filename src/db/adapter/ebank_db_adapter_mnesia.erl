@@ -33,13 +33,7 @@ create_table(Args) ->
     Fields = maps:get(fields, Args),
     Indexes = maps:get(indexes, Args, []),
     Nodes = maps:get(nodes, Args, [node()]),
-    Persist =
-        case maps:get(persist, Args, false) of
-            true ->
-                {true, maps:get(persist_interval, Args)};
-            false ->
-                false
-        end,
+    Persist = maps:get(persist, Args, false),
     do_create_table(Name, Fields, Indexes, Nodes, Persist).
 
 with_transaction(Fun) ->
