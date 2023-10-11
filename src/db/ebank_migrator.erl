@@ -9,16 +9,9 @@
 
 % @todo: escript that executes migrations.
 migrate(_Method = up, _Version = 1) ->
-    EnvArgs = table_env_args(),
-    Schemas = lists:map(fun(M) -> M:schema() end, ebank_env:get(models)),
-    lists:foreach(fun(Schema) ->
-        ebank_db:create_table(EnvArgs#{
-            name => ebank_schema:table(Schema),
-            record => ebank_schema:record(Schema),
-            fields => ebank_schema:fields_name(Schema),
-            indexes => ebank_schema:indexed_fields_name(Schema)
-        })
-    end, Schemas).
+    Args = table_env_args(),
+    Models = ebank_env:get(models),
+    ebank_repo:create_tables(Args, Models).
 
 %%----------------------------------------------------------------------
 %% INTERNAL FUNCTIONS

@@ -1,8 +1,8 @@
 -module(ebank_repo).
 
 %% API functions
--export([ create_tables/0
-        , create_table/1
+-export([ create_tables/2
+        , create_table/2
         , insert/2
         ]).
 
@@ -10,23 +10,22 @@
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
 
-create_tables() ->
-    Models = ebank_env:get(models),
+create_tables(Args, Models) ->
     Schemas = lists:map(fun(Mod) -> Mod:schema() end, Models),
-    do_create_tables(Schemas).
+    do_create_tables(Schemas, Args).
 
-do_create_tables([Schema | Schemas]) ->
-    case create_table(Schema) of
+do_create_tables([Schema | Schemas], Args) ->
+    case create_table(Args, Schema) of
         ok ->
-            do_create_tables(Schemas);
+            do_create_tables(Schemas, Args);
         {error, Reason} ->
             {error, Reason}
     end;
-do_create_tables([]) ->
+do_create_tables([], _) ->
     ok.
 
-create_table(Schema) ->
-    ebank_db:create_table(#{
+create_table(Args, Schema) ->
+    ebank_db:create_table(Args#{
         name => ebank_schema:table(Schema),
         fields => ebank_schema:fields_name(Schema)
     }).
