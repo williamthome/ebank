@@ -41,6 +41,7 @@ has_model_attr(Forms) ->
     end.
 
 is_schema_fun_exported(Model) ->
+    code:ensure_loaded(Model),
     erlang:function_exported(Model, schema, 0).
 
 has_query_attr(Forms) ->
