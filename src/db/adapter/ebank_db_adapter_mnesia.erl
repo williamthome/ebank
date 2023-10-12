@@ -1,10 +1,11 @@
 -module(ebank_db_adapter_mnesia).
 
+% @note: from OTP-27 this flag can be removed.
 -feature(maybe_expr, enable).
 
 -behaviour(ebank_db_adapter).
 
-%% ebank_db callbacks
+%% ebank_db_adapter callbacks
 -export([ connect/1
         , create_table/1
         , with_transaction/1
@@ -17,7 +18,7 @@
 -export([ start_mnesia/0 ]).
 
 %%----------------------------------------------------------------------
-%% EBANK_DB CALLBACKS
+%% EBANK_DB_ADAPTER CALLBACKS
 %%----------------------------------------------------------------------
 
 connect(Args) ->
