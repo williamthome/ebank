@@ -4,7 +4,12 @@
 -behaviour(cowboy_handler).
 
 %% ebank_server_adapter callbacks
--export([ start/1 ]).
+-export([ start/1
+        , put_headers/2
+        , set_status_code/2
+        , set_body/2
+        , get_body/1
+        ]).
 
 %% cowboy_handler callbacks
 -export([ init/2 ]).
@@ -40,6 +45,20 @@ start(Args) ->
             {error, Reason}
     end.
 
+put_headers(Headers, Req) ->
+    cowboy_req:set_resp_headers(Headers, Req).
+
+set_status_code(StatusCode, Req) ->
+    cowboy_req:reply(StatusCode, Req).
+
+set_body(Body, Req) ->
+    cowboy_req:set_resp_body(Body, Req).
+
+% @todo: body stream.
+get_body(Req0) ->
+    {ok, Body, Req} = cowboy_req:read_body(Req0, #{length => infinity}),
+    {Body, Req}.
+
 %%----------------------------------------------------------------------
 %% COWBOY_HANDLER CALLBACKS
 %%----------------------------------------------------------------------
@@ -49,12 +68,7 @@ init(Req, State) ->
     Path = normalize_path(cowboy_req:path(Req)),
     Router = State#state.router,
     {M, F, A} = Router:match(Method, Path),
-    {ok, Res0} = M:F(A, Req),
-    Res = cowboy_req:reply(200,
-        #{<<"content-type">> => <<"text/plain">>},
-        <<"Hello, World!">>,
-        Res0
-    ),
+    {ok, Res} = M:F(A, Req),
     {ok, Res, State}.
 
 %%----------------------------------------------------------------------

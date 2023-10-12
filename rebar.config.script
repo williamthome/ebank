@@ -9,6 +9,9 @@ EnvConfig = fun
                     port => 8080
                 }
             }},
+            {json, #{
+                adapter => ebank_json_adapter_thoas
+            }},
             {db, #{
                 adapter => ebank_db_adapter_mnesia,
                 args => #{
@@ -19,12 +22,12 @@ EnvConfig = fun
             {dsl, #{
                 adapter => ebank_dsl_adapter_mnesia
             }},
-            {models, [
-                ebank_account
-            ]},
             {crypto, #{
                 salt => "oZzuwZvsSHutZFBt7hmA4gcBH9rsByEY"
-            }}
+            }},
+            {models, [
+                ebank_account
+            ]}
         ]}];
     (_) ->
         [{ebank, [
@@ -34,6 +37,9 @@ EnvConfig = fun
                     router => ebank_router,
                     port => 8080
                 }
+            }},
+            {json, #{
+                adapter => ebank_json_adapter_thoas
             }},
             {db, #{
                 adapter => ebank_db_adapter_mnesia,
@@ -45,13 +51,13 @@ EnvConfig = fun
             {dsl, #{
                 adapter => ebank_dsl_adapter_mnesia
             }},
-            {models, [
-                ebank_account
-            ]},
             {crypto, #{
                 salt => os:getenv( "EBANK_CRYPTO_SALT"
                                  , "oZzuwZvsSHutZFBt7hmA4gcBH9rsByEY" )
-            }}
+            }},
+            {models, [
+                ebank_account
+            ]}
         ]}]
 end,
 
@@ -70,7 +76,11 @@ application:set_env(EnvConfig(ENV)),
         % Third-party
 
         {cowboy, { git, "https://github.com/ninenines/cowboy"
-                 , {tag, "2.10.0"}} }
+                 , {tag, "2.10.0"}} },
+
+        {thoas, { git
+                , "https://github.com/lpil/thoas"
+                , {tag, "v1.0.0"}} }
     ]},
 
     {dialyzer, [

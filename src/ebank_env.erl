@@ -4,6 +4,7 @@
 %% API functions
 -export([ get_all/0, get/1, get/2 ]).
 -export([ get_server/0, get_server/1, get_server/2 ]).
+-export([ get_json/0, get_json/1, get_json/2 ]).
 -export([ get_db/0, get_db/1, get_db/2 ]).
 -export([ get_dsl/0, get_dsl/1, get_dsl/2 ]).
 -export([ get_crypto/0, get_crypto/1, get_crypto/2 ]).
@@ -31,6 +32,17 @@ get_server(Key) ->
 
 get_server(Key, Default) ->
     maps:get(Key, get_server(), Default).
+
+% json
+
+get_json() ->
+    get(json).
+
+get_json(Key) ->
+    maps:get(Key, get_json()).
+
+get_json(Key, Default) ->
+    maps:get(Key, get_json(), Default).
 
 % db
 

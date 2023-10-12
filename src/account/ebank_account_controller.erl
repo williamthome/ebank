@@ -7,23 +7,47 @@
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
 
-fetch(IdBin, Req) ->
+fetch(IdBin, Req0) ->
     case ebank_converter:binary_to_integer(IdBin) of
-        {ok, _Id} ->
+        {ok, Id} ->
+            % @todo: fetch data.
+            Req1 = ebank_server:set_json_body(#{
+                id => Id
+            }, Req0),
+            Req = ebank_server:set_status_code(200, Req1),
             {ok, Req};
         {error, badarg} ->
-            % @todo: set error response.
+            Req = ebank_server:set_status_code(404, Req0),
             {ok, Req}
     end.
 
-insert([], Req) ->
-    {ok, Req}.
+insert([], Req0) ->
+    case ebank_server:get_json_body(Req0) of
+        {ok, {Body, Req1}} ->
+            % @todo: insert data.
+            case ebank_server:set_json_body(Body, Req1) of
+                {ok, Req2} ->
+                    Req = ebank_server:set_status_code(200, Req2),
+                    {ok, Req};
+                {error, _Reason} ->
+                    Req = ebank_server:set_status_code(500, Req0),
+                    {ok, Req}
+            end;
+        {error, _Reason} ->
+            Req = ebank_server:set_status_code(400, Req0),
+            {ok, Req}
+    end.
 
-update(IdBin, Req) ->
+update(IdBin, Req0) ->
     case ebank_converter:binary_to_integer(IdBin) of
-        {ok, _Id} ->
+        {ok, Id} ->
+            % @todo: update data.
+            Req1 = ebank_server:set_json_body(#{
+                id => Id
+            }, Req0),
+            Req = ebank_server:set_status_code(200, Req1),
             {ok, Req};
         {error, badarg} ->
-            % @todo: set error response.
+            Req = ebank_server:set_status_code(404, Req0),
             {ok, Req}
     end.

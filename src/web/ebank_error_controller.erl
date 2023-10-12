@@ -7,6 +7,7 @@
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
 
-% @todo: set error response.
-invalid_route([_Method, _Path], Req) ->
+% @todo: improve response.
+invalid_route([_Method, _Path], Req0) ->
+    Req = ebank_server:set_status_code(404, Req0),
     {ok, Req}.
