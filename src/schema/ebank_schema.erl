@@ -7,7 +7,6 @@
         , fields_name/1
         , indexed_fields_name/1
         , fields_index/1
-        , fields_default/1
         , fields_type/1
         , permitted_fields/1
         , required_fields/1
@@ -67,14 +66,6 @@ fields_index(Schema) ->
         {Acc#{Name => Index}, Index+1}
     end, {#{}, InitialIndex}, fields_name(Schema))).
 
-fields_default(Schema) ->
-    lists:foldl(fun({Name, Field}, Acc) ->
-        case ebank_field:default(Field) of
-            undefined -> Acc;
-            Default -> Acc#{Name => Default}
-        end
-    end, #{}, fields(Schema)).
-
 fields_type(Schema) ->
     lists:foldl(fun({Name, Field}, Acc) ->
         Acc#{Name => ebank_field:type(Field)}
@@ -111,10 +102,7 @@ set_field_value(Name, Value, Record, Schema) ->
 
 changeset(Data, Params, Schema) ->
     Required = required_fields(Schema),
-    Defaults = fields_default(Schema),
-    Pipes = [ changeset:validate_required(Required)
-            , pipe_apply_defaults(Defaults)
-            ],
+    Pipes = [ changeset:validate_required(Required) ],
     changeset(Data, Params, Schema, Pipes).
 
 changeset(Data, Params, Schema, Pipes) ->
@@ -129,22 +117,6 @@ to_record(Params, Schema) ->
 %%----------------------------------------------------------------------
 %% INTERNAL FUNCTIONS
 %%----------------------------------------------------------------------
-
-pipe_apply_defaults(Defaults) ->
-    fun(Changeset) ->
-        Data = changeset:get_data(Changeset),
-        Changes = changeset:get_changes(Changeset),
-        EmptyValues = changeset:get_empty_values(Changeset),
-        maps:fold(fun(FieldName, DefaultFun, Acc) ->
-            IsDefined = changeset:is_field_value_defined(FieldName, Data, Changes, EmptyValues),
-            case IsDefined of
-                true ->
-                    Acc;
-                false ->
-                    DefaultFun(Acc)
-            end
-        end, Changeset, Defaults)
-    end.
 
 normalize_fields(Fields) ->
     lists:reverse(element(1, lists:mapfoldl(fun({Name, Args}, I) ->
