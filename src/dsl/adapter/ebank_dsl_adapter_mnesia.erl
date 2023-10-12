@@ -10,4 +10,6 @@
 %%----------------------------------------------------------------------
 
 query(Clauses, Indexes) ->
-    ebank_qlc:compile(ebank_qlc:query(mnesia, Clauses, Indexes)).
+    _Query = lists:flatten(ebank_qlc:query(mnesia, Clauses, Indexes)).
+    % @todo: compile the query.
+    % ebank_qlc:compile(Query, [{'Bindings', Bindings}]).

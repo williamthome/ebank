@@ -9,7 +9,7 @@
         , create_table/1
         , with_transaction/1
         , abort_transaction/1
-        , read/1
+        , read/2
         , write/2
         ]).
 
@@ -45,8 +45,9 @@ with_transaction(Fun) ->
 abort_transaction(Reason) ->
     mnesia:abort(Reason).
 
-read(Query) ->
-    {ok, ebank_qlc:eval(Query)}.
+% @todo: compile query via parse transform.
+read(Query, Bindings) ->
+    {ok, ebank_qlc:eval(ebank_qlc:compile(Query, [{'Bindings', Bindings}]))}.
 
 write(Data, Table) ->
     normalize_result(mnesia:write(Table, Data, write)).

@@ -5,7 +5,7 @@
         , create_table/1
         , with_transaction/1
         , abort_transaction/1
-        , read/1
+        , read/2
         , write/2
         ]).
 
@@ -28,8 +28,8 @@ with_transaction(Fun) ->
 abort_transaction(Reason) ->
     ?ADAPTER:abort_transaction(Reason).
 
-read(Query) ->
-    ?ADAPTER:read(Query).
+read(Query, Bindings) ->
+    ?ADAPTER:read(Query, Bindings).
 
 write(Data, Table) ->
     ?ADAPTER:write(Data, Table).

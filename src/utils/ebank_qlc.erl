@@ -1,7 +1,7 @@
 -module(ebank_qlc).
 
 %% API functions
--export([ query/3, compile/1, eval/1 ]).
+-export([ query/3, compile/2, eval/1 ]).
 
 %%----------------------------------------------------------------------
 %% API FUNCTIONS
@@ -10,12 +10,8 @@
 query(DB, Clauses, Indexes) ->
     [$[, query_body(DB, Clauses, Indexes), $]].
 
-compile(Query) ->
-    {ok, Tokens, _} = erl_scan:string(lists:flatten([Query, $.])),
-    {ok, [Expr]} = erl_parse:parse_exprs(Tokens),
-    {ok, QueryExpr} = qlc_pt:transform_expression(Expr, []),
-    {value, Compiled, []} = erl_eval:expr(QueryExpr, []),
-    Compiled.
+compile(Query, Bindings) ->
+    qlc:string_to_handle(lists:flatten([Query, $.]), [], Bindings).
 
 eval(Compiled) ->
     qlc:eval(Compiled).
@@ -42,14 +38,33 @@ query_clauses([{'orelse', List} | T], Indexes, Acc) ->
 query_clauses([{'andalso', List} | T], Indexes, Acc) ->
     Query = [$(, lists:join(" andalso ", query_clauses(List, Indexes, [])), $)],
     query_clauses(T, Indexes, [Query | Acc]);
+query_clauses([{{Table, Field}, Op, Atom} | T], Indexes, Acc) when is_atom(Atom) ->
+    case atom_to_binary(Atom) of
+        <<$@, Var/binary>> ->
+            Index = field_index(Field, Table, Indexes),
+            TableAlias = table_alias(Table),
+            Query = io_lib:format( "element(~p, ~s) ~s maps:get(~s, Bindings)"
+                                , [Index, TableAlias, atom_to_list(Op), Var] ),
+            query_clauses(T, Indexes, [Query | Acc]);
+        _ ->
+            Index = field_index(Field, Table, Indexes),
+            TableAlias = table_alias(Table),
+            Query = io_lib:format( "element(~p, ~s) ~s ~p"
+                                , [Index, TableAlias, atom_to_list(Op), Atom] ),
+            query_clauses(T, Indexes, [Query | Acc])
+    end;
 query_clauses([{{Table, Field}, Op, Val} | T], Indexes, Acc) ->
-    % @note: plus one due to the record name: {record_name, ...attrs}
-    Index = maps:get(Field, maps:get(Table, Indexes)) + 1,
+    Index = field_index(Field, Table, Indexes),
     TableAlias = table_alias(Table),
-    Query = io_lib:format("element(~p, ~s) ~s ~p", [Index, TableAlias, atom_to_list(Op), Val]),
+    Query = io_lib:format( "element(~p, ~s) ~s ~p"
+                         , [Index, TableAlias, atom_to_list(Op), Val] ),
     query_clauses(T, Indexes, [Query | Acc]);
 query_clauses([], _, Acc) ->
     lists:reverse(Acc).
+
+% @note: plus one due to the record name: {record_name, ...attrs}
+field_index(Field, Table, Indexes) ->
+    maps:get(Field, maps:get(Table, Indexes)) + 1.
 
 table_alias(Table) ->
     do_table_alias(atom_to_binary(Table)).

@@ -6,6 +6,9 @@
 %% Libs
 -include("ebank_repo.hrl").
 
+%% Queries
+-query([ q_fetch_by_id/0 ]).
+
 %%----------------------------------------------------------------------
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
@@ -14,13 +17,9 @@ insert(Params) ->
     ebank_repo:insert_one(Params, ebank_account:schema()).
 
 fetch(Id) ->
-    Schema = ebank_account:schema(),
-    Table = ebank_schema:table(Schema),
-    FieldsIndex = ebank_schema:fields_index(Schema),
-    Indexes = #{Table => FieldsIndex},
-    Clauses = [{{Table, id}, '=:=', Id}],
-    Query = ebank_dsl:query(Clauses, Indexes),
-    ebank_repo:fetch_one(Query).
+    ebank_repo:fetch_one(q_fetch_by_id(), #{
+        id => Id
+    }).
 
 update(Id, Params) ->
     case fetch(Id) of
@@ -29,3 +28,16 @@ update(Id, Params) ->
         {error, Reason} ->
             {error, Reason}
     end.
+
+%%----------------------------------------------------------------------
+%% INTERNAL FUNCTIONS
+%%----------------------------------------------------------------------
+
+q_fetch_by_id() ->
+    Schema = ebank_account:schema(),
+    Table = ebank_schema:table(Schema),
+    FieldsIndex = ebank_schema:fields_index(Schema),
+    Indexes = #{Table => FieldsIndex},
+    Clauses = [{{Table, id}, '=:=', '@id'}],
+    ebank_dsl:query(Clauses, Indexes).
+

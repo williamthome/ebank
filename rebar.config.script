@@ -1,0 +1,82 @@
+ENV = list_to_atom(os:getenv("ENV", "dev")),
+EnvConfig = fun
+    (test) ->
+        [{ebank, [
+            {db, #{
+                adapter => ebank_db_adapter_mnesia,
+                args => #{
+                    dir => "/tmp/ebank_db_test",
+                    persist => false
+                }
+            }},
+            {dsl, #{
+                adapter => ebank_dsl_adapter_mnesia
+            }},
+            {models, [
+                ebank_account
+            ]}
+        ]}];
+    (_) ->
+        [{ebank, [
+            {db, #{
+                adapter => ebank_db_adapter_mnesia,
+                args => #{
+                    dir => "/tmp/ebank_db",
+                    persist => {true, 180_000} % 3 minutes
+                }
+            }},
+            {dsl, #{
+                adapter => ebank_dsl_adapter_mnesia
+            }},
+            {models, [
+                ebank_account
+            ]}
+        ]}]
+end,
+application:set_env(EnvConfig(ENV)),
+
+[
+    {deps, [
+        {changeset, { git
+                    , "https://github.com/williamthome/changeset"
+                    , {branch, "main"}} },
+        {parserl, { git
+                  , "https://github.com/williamthome/parserl"
+                  , {branch, "main"}} }
+    ]},
+
+    {erl_opts, [debug_info]},
+
+    {profiles, [
+        {dev, [
+            {deps, [
+                % Used by $ make daemon
+                {sync, ".*", { git
+                             , "https://github.com/rustyio/sync.git"
+                             , {branch, "master"}} }
+            ]}
+        ]},
+        {prod, [
+            {erl_opts, [
+                no_debug_info,
+                warnings_as_errors
+            ]},
+            {relx, [
+                {dev_mode, false},
+                {include_erts, true}
+            ]}
+        ]},
+        {test, [
+            % nothing here yet!
+        ]}
+    ]},
+
+    {relx, [
+        {dev_mode, true},
+        {include_erts, false}
+    ]},
+
+    {shell, [
+        {apps, [ebank]}
+    ]}
+].
