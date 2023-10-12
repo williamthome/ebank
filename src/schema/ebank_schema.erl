@@ -119,9 +119,9 @@ to_record(Params, Schema) ->
 %%----------------------------------------------------------------------
 
 normalize_fields(Fields) ->
-    lists:reverse(element(1, lists:mapfoldl(fun({Name, Args}, I) ->
+    element(1, lists:mapfoldl(fun({Name, Args}, I) ->
         {normalize_field({Name, Args}, I), I+1}
-    end, 1, Fields))).
+    end, 1, Fields)).
 
 normalize_field({Name, Args0}, Index) ->
     Args = Args0#{name => Name, index => Index},

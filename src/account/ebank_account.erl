@@ -55,7 +55,7 @@ changeset(Data, Params) ->
 %%----------------------------------------------------------------------
 
 set_id(Changeset) ->
-    case changeset:get_change(id, Changeset, undefined) of
+    case changeset:get_data(id, Changeset, undefined) of
         undefined ->
             % @@todo: unique id.
             Id = rand:uniform(1_000),
@@ -65,7 +65,7 @@ set_id(Changeset) ->
     end.
 
 set_created_at(Changeset) ->
-    case changeset:get_change(created_at, Changeset, undefined) of
+    case changeset:get_data(created_at, Changeset, undefined) of
         undefined ->
             Now = calendar:universal_time(),
             changeset:push_change(created_at, Now, Changeset);
