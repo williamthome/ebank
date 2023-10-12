@@ -8,12 +8,16 @@
 %%----------------------------------------------------------------------
 
 parse_transform(Forms, _Options) ->
-    ensure_schema_mod_loaded(),
-    case has_schema_fun(Forms) of
-        {true, Form} ->
-            replace_schema_fun(Form, Forms);
+    case ensure_schema_mod_loaded() of
+        true ->
+            case has_schema_fun(Forms) of
+                {true, Form} ->
+                    replace_schema_fun(Form, Forms);
+                false ->
+                    % @todo: emit a warning about no schema fun.
+                    Forms
+            end;
         false ->
-            % @todo: emit a warning about no schema fun.
             Forms
     end.
 
@@ -22,7 +26,8 @@ parse_transform(Forms, _Options) ->
 %%----------------------------------------------------------------------
 
 ensure_schema_mod_loaded() ->
-    code:ensure_loaded(ebank_schema).
+    code:ensure_loaded(ebank_schema),
+    erlang:function_exported(ebank_schema, new, 1).
 
 has_schema_fun(Forms) ->
     parserl_trans:find_function(schema, 0, Forms).

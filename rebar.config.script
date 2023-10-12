@@ -45,6 +45,10 @@ application:set_env(EnvConfig(ENV)),
                   , {branch, "main"}} }
     ]},
 
+    {dialyzer, [
+        {plt_extra_apps, [mnesia, changeset, parserl]}
+    ]},
+
     {erl_opts, [debug_info]},
 
     {profiles, [
