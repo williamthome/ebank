@@ -1,4 +1,3 @@
-ENV = list_to_atom(os:getenv("ENV", "dev")),
 EnvConfig = fun
     (test) ->
         [{ebank, [
@@ -14,7 +13,10 @@ EnvConfig = fun
             }},
             {models, [
                 ebank_account
-            ]}
+            ]},
+            {crypto, #{
+                salt => "oZzuwZvsSHutZFBt7hmA4gcBH9rsByEY"
+            }}
         ]}];
     (_) ->
         [{ebank, [
@@ -30,9 +32,15 @@ EnvConfig = fun
             }},
             {models, [
                 ebank_account
-            ]}
+            ]},
+            {crypto, #{
+                salt => os:getenv( "EBANK_CRYPTO_SALT"
+                                 , "oZzuwZvsSHutZFBt7hmA4gcBH9rsByEY" )
+            }}
         ]}]
 end,
+
+ENV = list_to_atom(os:getenv("ENV", "dev")),
 application:set_env(EnvConfig(ENV)),
 
 [

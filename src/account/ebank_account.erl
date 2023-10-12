@@ -44,8 +44,11 @@ changeset(Data, Params) ->
     Changeset = ebank_schema:changeset(Data, Params, schema()),
     case changeset:is_valid(Changeset) of
         true ->
-            Pipes = [ fun set_id/1, fun set_created_at/1 ],
-            changeset:pipe(Changeset, Pipes);
+            changeset:pipe(Changeset, [
+                fun set_id/1,
+                fun hash_password/1,
+                fun set_created_at/1
+            ]);
         false ->
             Changeset
     end.
@@ -57,10 +60,18 @@ changeset(Data, Params) ->
 set_id(Changeset) ->
     case changeset:get_data(id, Changeset, undefined) of
         undefined ->
-            % @@todo: unique id.
-            Id = rand:uniform(1_000),
+            Id = ebank_crypto:rand_int(),
             changeset:push_change(id, Id, Changeset);
         _ ->
+            Changeset
+    end.
+
+hash_password(Changeset) ->
+    case changeset:find_changes(password, Changeset) of
+        {ok, Password} ->
+            Hash = ebank_crypto:strong_hash(Password),
+            changeset:push_change(password, Hash, Changeset);
+        error ->
             Changeset
     end.
 
