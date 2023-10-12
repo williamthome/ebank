@@ -21,7 +21,7 @@
         ]).
 
 %% Types
--export_type([ t/0, fields/0, field_name/0 ]).
+-export_type([ t/0, table/0, fields/0, field_name/0, changeset/0, data/0 ]).
 
 -record(schema, { table :: table()
                 , fields :: fields()
@@ -30,10 +30,10 @@
 -opaque t() :: #schema{}.
 
 -type table() :: ebank_db:table().
-
 -type fields() :: #{ field_name() := ebank_fields:t() }.
-
 -type field_name() :: atom().
+-type changeset() :: changeset:t().
+-type data() :: map().
 
 %%----------------------------------------------------------------------
 %% API FUNCTIONS

@@ -9,32 +9,40 @@
         , update_one/3
         ]).
 
+-type model() :: module().
+
+%% Callbacks
+-optional_callbacks([]).
+
+-callback model() -> model().
+
 %%----------------------------------------------------------------------
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
 
 create_tables(Args, Models) ->
-    Schemas = lists:map(fun(Mod) -> Mod:schema() end, Models),
-    do_create_tables(Schemas, Args).
+    do_create_tables(Models, Args).
 
-do_create_tables([Schema | Schemas], Args) ->
-    case create_table(Args, Schema) of
+do_create_tables([Model | Models], Args) ->
+    case create_table(Args, Model) of
         ok ->
-            do_create_tables(Schemas, Args);
+            do_create_tables(Models, Args);
         {error, Reason} ->
             {error, Reason}
     end;
 do_create_tables([], _) ->
     ok.
 
-create_table(Args, Schema) ->
+create_table(Args, Model) ->
+    Schema = Model:schema(),
     ebank_db:create_table(Args#{
         name => ebank_schema:table(Schema),
         fields => ebank_schema:fields_name(Schema)
     }).
 
-insert_one(Params, Schema) when is_map(Params) ->
-    Changeset = ebank_schema:changeset(#{}, Params, Schema),
+insert_one(Params, Model) when is_map(Params) ->
+    Schema = Model:schema(),
+    Changeset = Model:changeset(#{}, Params),
     normalize_one_data_result(do_insert([Changeset], Schema)).
 
 fetch(Query, Bindings) ->
@@ -49,13 +57,14 @@ fetch(Query, Bindings) ->
 fetch_one(Query, Bindings) ->
     normalize_one_data_result(fetch(Query, Bindings)).
 
-update_one(Record, Params, Schema) ->
+update_one(Record, Params, Model) ->
+    Schema = Model:schema(),
     FieldsIndex = ebank_schema:fields_index(Schema),
     IndexesName = maps:fold(fun(Name, Index, Acc) ->
         Acc#{Index => Name}
     end, #{}, FieldsIndex),
     Data = ebank_records:to_map(IndexesName, Record),
-    Changeset = ebank_schema:changeset(Data, Params, Schema),
+    Changeset = Model:changeset(Data, Params),
     normalize_one_data_result(do_update([Changeset], Schema)).
 
 %%----------------------------------------------------------------------
