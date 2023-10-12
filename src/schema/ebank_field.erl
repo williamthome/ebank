@@ -12,7 +12,7 @@
         ]).
 
 %% Types
--export_type([ t/0, name/0, index/0 ]).
+-export_type([ t/0, name/0, index/0, type/0 ]).
 
 -record(field, { name :: atom()
                , index :: index()

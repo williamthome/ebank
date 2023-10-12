@@ -9,7 +9,7 @@
         , create_table/1
         , with_transaction/1
         , abort_transaction/1
-        , read/2
+        , read/1
         , write/2
         ]).
 
@@ -45,9 +45,8 @@ with_transaction(Fun) ->
 abort_transaction(Reason) ->
     mnesia:abort(Reason).
 
-read(Clauses, Indexes) ->
-    Query = query(Clauses, Indexes),
-    {ok, eval_query(Query)}.
+read(Query) ->
+    {ok, ebank_qlc:eval(Query)}.
 
 write(Data, Table) ->
     normalize_result(mnesia:write(Table, Data, write)).
@@ -116,7 +115,9 @@ do_create_table_1(Name, Record, Fields, Indexes, Nodes, Persist) ->
         {disc_copies, Nodes},
         {storage_properties, [
             {ets, [
-                {protection, private},
+                % @todo: protect table against external changes.
+                % @see: https://www.erlang.org/doc/man/ets#private
+                % {protection, private},
                 {write_concurrency, true},
                 {read_concurrency, true},
                 {decentralized_counters, true}
@@ -148,9 +149,3 @@ normalize_result({ok, Result}) ->
     {ok, Result};
 normalize_result({error, Reason}) ->
     {error, Reason}.
-
-query(Clauses, Indexes) ->
-    ebank_qlc:query(mnesia, Clauses, Indexes).
-
-eval_query(Query) ->
-    ebank_qlc:eval_query(Query).

@@ -1,7 +1,7 @@
 -module(ebank_qlc).
 
 %% API functions
--export([ query/3, eval_query/1 ]).
+-export([ query/3, compile/1, eval/1 ]).
 
 %%----------------------------------------------------------------------
 %% API FUNCTIONS
@@ -10,14 +10,15 @@
 query(DB, Clauses, Indexes) ->
     [$[, query_body(DB, Clauses, Indexes), $]].
 
-
-% @todo: use parse transformation to compile queries and boost performance.
-eval_query(Query) ->
+compile(Query) ->
     {ok, Tokens, _} = erl_scan:string(lists:flatten([Query, $.])),
     {ok, [Expr]} = erl_parse:parse_exprs(Tokens),
     {ok, QueryExpr} = qlc_pt:transform_expression(Expr, []),
-    {value, QH, []} = erl_eval:expr(QueryExpr, []),
-    qlc:eval(QH).
+    {value, Compiled, []} = erl_eval:expr(QueryExpr, []),
+    Compiled.
+
+eval(Compiled) ->
+    qlc:eval(Compiled).
 
 %%----------------------------------------------------------------------
 %% INTERNAL FUNCTIONS
@@ -120,6 +121,6 @@ eval_query_test() ->
         {user,<<"Robert">>,undefined},
         {user,<<"Anyone">>,10}
     ],
-    ?assertEqual(Expected, eval_query(query(DB, Clauses, Indexes))).
+    ?assertEqual(Expected, eval(query(DB, Clauses, Indexes))).
 
 -endif.

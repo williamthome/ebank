@@ -5,10 +5,11 @@
         , create_table/1
         , with_transaction/1
         , abort_transaction/1
-        , read/2
+        , read/1
         , write/2
         ]).
 
+%% Macros
 -define(ADAPTER, (ebank_env:get_db(adapter))).
 
 %%----------------------------------------------------------------------
@@ -27,8 +28,8 @@ with_transaction(Fun) ->
 abort_transaction(Reason) ->
     ?ADAPTER:abort_transaction(Reason).
 
-read(Clauses, Indexes) ->
-    ?ADAPTER:read(Clauses, Indexes).
+read(Query) ->
+    ?ADAPTER:read(Query).
 
 write(Data, Table) ->
     ?ADAPTER:write(Data, Table).

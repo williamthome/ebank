@@ -4,6 +4,7 @@
 %% API functions
 -export([ get_all/0, get/1, get/2 ]).
 -export([ get_db/0, get_db/1, get_db/2 ]).
+-export([ get_dsl/0, get_dsl/1, get_dsl/2 ]).
 
 %%----------------------------------------------------------------------
 %% API FUNCTIONS
@@ -26,3 +27,12 @@ get_db(Key) ->
 
 get_db(Key, Default) ->
     maps:get(Key, get_db(), Default).
+
+get_dsl() ->
+    get(dsl).
+
+get_dsl(Key) ->
+    maps:get(Key, get_dsl()).
+
+get_dsl(Key, Default) ->
+    maps:get(Key, get_dsl(), Default).

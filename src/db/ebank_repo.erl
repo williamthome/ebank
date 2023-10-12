@@ -4,8 +4,8 @@
 -export([ create_tables/2
         , create_table/2
         , insert_one/2
-        , fetch/2
-        , fetch_one/2
+        , fetch/1
+        , fetch_one/1
         , update_one/3
         ]).
 
@@ -37,11 +37,8 @@ insert_one(Params, Schema) when is_map(Params) ->
     Changeset = ebank_schema:changeset(#{}, Params, Schema),
     normalize_one_data_result(do_insert([Changeset], Schema)).
 
-fetch(Clauses, Schema) ->
-    Table = ebank_schema:table(Schema),
-    FieldsIndex = ebank_schema:fields_index(Schema),
-    Indexes = #{Table => FieldsIndex},
-    Fetch = fun() -> ebank_db:read(Clauses, Indexes) end,
+fetch(Query) ->
+    Fetch = fun() -> ebank_db:read(Query) end,
     case ebank_db:with_transaction(Fetch) of
         {ok, Data} ->
             {ok, Data};
@@ -49,8 +46,8 @@ fetch(Clauses, Schema) ->
             {error, Reason}
     end.
 
-fetch_one(Clauses, Schema) ->
-    normalize_one_data_result(fetch(Clauses, Schema)).
+fetch_one(Query) ->
+    normalize_one_data_result(fetch(Query)).
 
 update_one(Record, Params, Schema) ->
     FieldsIndex = ebank_schema:fields_index(Schema),

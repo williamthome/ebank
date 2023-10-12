@@ -1,14 +1,12 @@
 -module(ebank_db_adapter).
 
 %% Types
--export_type([ data/0, table/0 ]).
+-export_type([ transaction_fun/0, query/0, table/0 ]).
 
 -type transaction_fun() :: fun(() -> {ok, term()} | {error, term()}).
 -type data() :: term().
+-type query() :: term().
 -type table() :: atom().
--type field() :: atom().
--type indexes() :: #{table() => #{field() => pos_integer()}}.
--type clause() :: tuple().
 
 %% Callbacks
 -optional_callbacks([]).
@@ -25,10 +23,8 @@
 -callback abort_transaction(Reason) -> no_return()
     when Reason :: {error, term()}.
 
--callback read(Clauses, Indexes) -> ok | {error, term()}
-    when Clauses :: [clause()]
-       , Indexes :: indexes()
-       .
+-callback read(Query) -> ok | {error, term()}
+    when Query :: query().
 
 -callback write(Data, Table) -> ok | {error, term()}
     when Data :: data()
