@@ -12,7 +12,6 @@
 %% EBANK_MODEL CALLBACKS
 %%----------------------------------------------------------------------
 
-% @todo: expand via parse transform.
 schema() ->
     ebank_schema:new(#{
         table => account,
