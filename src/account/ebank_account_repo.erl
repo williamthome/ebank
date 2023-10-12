@@ -1,10 +1,5 @@
 -module(ebank_account_repo).
 
--behaviour(ebank_repo).
-
-%% ebank_repo callbacks
--export([ model/0 ]).
-
 %% API functions
 -export([ insert/1, fetch/1, update/2 ]).
 
@@ -14,14 +9,9 @@
 %% Macros
 -define(MODEL, ebank_account).
 
-%% Queries
+%% Repo
+-model(?MODEL).
 -query([ q_fetch_by_id/0 ]).
-
-%%----------------------------------------------------------------------
-%% EBANK_REPO CALLBACKS
-%%----------------------------------------------------------------------
-
-model() -> ?MODEL.
 
 %%----------------------------------------------------------------------
 %% API FUNCTIONS

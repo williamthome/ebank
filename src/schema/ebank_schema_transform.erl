@@ -8,19 +8,27 @@
 %%----------------------------------------------------------------------
 
 parse_transform(Forms, _Options) ->
-    FName = schema, FArity = 0,
-    case parserl_trans:find_function(FName, FArity, Forms) of
-        {true, FForm} ->
-            parserl_trans:replace_function(
-                FName, FArity, compile(FForm), Forms, []
-            );
+    ensure_schema_mod_loaded(),
+    case has_schema_fun(Forms) of
+        {true, Form} ->
+            replace_schema_fun(Form, Forms);
         false ->
-            error({schema_enoent, FName, FArity})
+            % @todo: emit a warning about no schema fun.
+            Forms
     end.
 
 %%----------------------------------------------------------------------
 %% INTERNAL FUNCTIONS
 %%----------------------------------------------------------------------
+
+ensure_schema_mod_loaded() ->
+    code:ensure_loaded(ebank_schema).
+
+has_schema_fun(Forms) ->
+    parserl_trans:find_function(schema, 0, Forms).
+
+replace_schema_fun(Form, Forms) ->
+    parserl_trans:replace_function(schema, 0, compile(Form), Forms, []).
 
 compile({function, _, _, _, [Clause0]} = Form) ->
     FBody = element(5, Clause0),
