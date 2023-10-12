@@ -1,6 +1,14 @@
+% @todo: remover duplicated config.
 EnvConfig = fun
     (test) ->
         [{ebank, [
+            {server, #{
+                adapter => ebank_server_adapter_cowboy,
+                args => #{
+                    router => ebank_router,
+                    port => 8080
+                }
+            }},
             {db, #{
                 adapter => ebank_db_adapter_mnesia,
                 args => #{
@@ -20,6 +28,13 @@ EnvConfig = fun
         ]}];
     (_) ->
         [{ebank, [
+            {server, #{
+                adapter => ebank_server_adapter_cowboy,
+                args => #{
+                    router => ebank_router,
+                    port => 8080
+                }
+            }},
             {db, #{
                 adapter => ebank_db_adapter_mnesia,
                 args => #{
@@ -50,11 +65,21 @@ application:set_env(EnvConfig(ENV)),
                     , {branch, "main"}} },
         {parserl, { git
                   , "https://github.com/williamthome/parserl"
-                  , {branch, "main"}} }
+                  , {branch, "main"}} },
+
+        % Third-party
+
+        {cowboy, { git, "https://github.com/ninenines/cowboy"
+                 , {tag, "2.10.0"}} }
     ]},
 
     {dialyzer, [
-        {plt_extra_apps, [mnesia, changeset, parserl]}
+        {plt_extra_apps, [
+            mnesia,
+            changeset,
+            parserl,
+            cowboy
+        ]}
     ]},
 
     {erl_opts, [debug_info]},
