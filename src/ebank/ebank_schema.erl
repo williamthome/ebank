@@ -38,8 +38,6 @@
 %% Callbacks
 -optional_callbacks([]).
 
--callback schema() -> t().
-
 -callback changeset(Data, Params) -> changeset()
     when Data :: data()
        , Params :: data()
