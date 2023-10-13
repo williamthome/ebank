@@ -138,6 +138,6 @@ eval_query_test() ->
         {user,<<"Robert">>,undefined},
         {user,<<"Anyone">>,10}
     ],
-    ?assertEqual(Expected, eval(query(DB, Clauses, Indexes))).
+    ?assertEqual(Expected, eval(compile(query(DB, Clauses, Indexes), #{}))).
 
 -endif.

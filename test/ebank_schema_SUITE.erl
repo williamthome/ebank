@@ -116,14 +116,14 @@ all() ->
 
 schema() ->
     ebank_schema:new(#{
-        fields => #{
-            name => #{
-                index => #user.name,
+        table => user,
+        fields => [
+            {name, #{
                 type => binary,
                 required => true,
                 permitted => true
-            }
-        }
+            }}
+        ]
     }).
 
 %%----------------------------------------------------------------------
@@ -139,7 +139,7 @@ fields_name(_Config) ->
 
 field(_Config) ->
     Args = #{ name => name
-            , index => #user.name
+            , index => #user.name - 1
             , type => binary
             , permitted => true
             , required => true
@@ -149,7 +149,7 @@ field(_Config) ->
     ok.
 
 field_index(_Config) ->
-    2 = ebank_schema:field_index(name, schema()),
+    1 = ebank_schema:field_index(name, schema()),
     ok.
 
 get_field_value(_Config) ->
@@ -164,11 +164,11 @@ set_field_value(_Config) ->
 
 changeset(_Config) ->
     false = changeset:is_valid(
-        ebank_schema:changeset(#{}, schema())
+        ebank_schema:changeset(#{}, #{}, schema())
     ),
 
     true = changeset:is_valid(
-        ebank_schema:changeset(#{name => <<"Joe">>}, schema())
+        ebank_schema:changeset(#{}, #{name => <<"Joe">>}, schema())
     ),
 
     ok.
