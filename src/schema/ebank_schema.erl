@@ -95,10 +95,10 @@ field_index(Name, Schema) ->
     ebank_field:index(field(Name, Schema)).
 
 get_field_value(Name, Record, Schema) ->
-    ebank_records:get_value(field_index(Name, Schema), Record).
+    ebank_records:get_value(field_index(Name, Schema) + 1, Record).
 
 set_field_value(Name, Value, Record, Schema) ->
-    ebank_records:set_value(field_index(Name, Schema), Value, Record).
+    ebank_records:set_value(field_index(Name, Schema) + 1, Value, Record).
 
 changeset(Data, Params, Schema) ->
     Required = required_fields(Schema),
