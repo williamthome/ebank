@@ -14,13 +14,6 @@
 %% cowboy_handler callbacks
 -export([ init/2 ]).
 
-%% Types
--export_type([]).
-
--record(state, { router :: router() }).
-
--type router() :: module().
-
 %% Macros
 -define(LISTENER, ebank_http_listener).
 
@@ -29,10 +22,7 @@
 %%----------------------------------------------------------------------
 
 start(Args) ->
-    State = #state{
-        router = maps:get(router, Args)
-    },
-    Routes = [{'_', ?MODULE, State}],
+    Routes = [{'_', ?MODULE, []}],
     Dispatch = cowboy_router:compile([{'_', Routes}]),
     RanchOpts = [
         {port, maps:get(port, Args, 8080)}
@@ -66,9 +56,7 @@ get_body(Req0) ->
 init(Req, State) ->
     Method = normalize_method(cowboy_req:method(Req)),
     Path = normalize_path(cowboy_req:path(Req)),
-    Router = State#state.router,
-    {M, F, A} = Router:match(Method, Path),
-    {ok, Res} = M:F(A, Req),
+    {ok, Res} = ebank_handler:handle(Method, Path, Req),
     {ok, Res, State}.
 
 %%----------------------------------------------------------------------
