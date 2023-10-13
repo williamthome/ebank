@@ -10,6 +10,16 @@ dev:
 test:
 	ENV="test" rebar3 as test do ct, eunit
 
+.PHONY: ct
+
+ct:
+	ENV="test" rebar3 as test ct
+
+.PHONY: eunit
+
+eunit:
+	ENV="test" rebar3 as test eunit
+
 .PHONY: daemon
 
 # Useful to test the server during development.
