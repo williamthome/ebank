@@ -19,7 +19,7 @@ parse_transform(Forms, _Options) ->
         {ok, _} ->
             % @todo: emit a warning about missing attributes.
             Forms;
-        {error, _} ->
+        error ->
             Forms
     end.
 
@@ -28,7 +28,8 @@ parse_transform(Forms, _Options) ->
 %%----------------------------------------------------------------------
 
 all_loaded(Model) ->
-    case ensure_modules_loaded([ebank_modules]) of
+    Deps = [ebank_modules],
+    case ensure_modules_loaded(Deps) of
         true ->
             ebank_modules:all_loaded([
                 {ebank_qlc, [{query, 3}]},
@@ -44,11 +45,12 @@ ensure_modules_loaded(Modules) ->
     end, Modules).
 
 collect_attributes(Forms) ->
-    case code:ensure_loaded(ebank_parse_transform) of
-        {module, ebank_parse_transform} ->
+    Deps = [parserl_trans, ebank_parse_transform],
+    case ensure_modules_loaded(Deps) of
+        true ->
             {ok, ebank_parse_transform:collect_attributes([model, query], Forms)};
-        {error, Reason} ->
-            {error, Reason}
+        false ->
+            error
     end.
 
 replace_schema_fun(QueryFuns, Forms) ->
