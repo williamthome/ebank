@@ -8,6 +8,7 @@
         , readonly/1
         , required/1
         , indexed/1
+        , redacted/1
         ]).
 
 %% Types
@@ -19,6 +20,7 @@
                , readonly :: boolean()
                , required :: boolean()
                , indexed :: boolean()
+               , redacted :: boolean()
                }).
 
 -opaque t() :: #field{}.
@@ -38,6 +40,7 @@ new(Args) ->
           , readonly = maps:get(readonly, Args, false)
           , required = maps:get(required, Args, false)
           , indexed = maps:get(indexed, Args, false)
+          , redacted = maps:get(redacted, Args, false)
           }.
 
 name(#field{name = Name}) ->
@@ -57,3 +60,6 @@ required(#field{required = Required}) ->
 
 indexed(#field{indexed = Indexed}) ->
     Indexed.
+
+redacted(#field{redacted = Redacted}) ->
+    Redacted.
