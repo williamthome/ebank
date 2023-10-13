@@ -38,10 +38,7 @@ fetch_one(Query, Bindings) ->
 
 update_one(Record, Params, SchemaMod) ->
     Schema = SchemaMod:schema(),
-    FieldsIndex = ebank_schema:fields_index(Schema),
-    IndexesName = maps:fold(fun(Name, Index, Acc) ->
-        Acc#{Index => Name}
-    end, #{}, FieldsIndex),
+    IndexesName = ebank_maps:invert(ebank_schema:fields_index(Schema)),
     Data = ebank_records:to_map(IndexesName, Record),
     Changeset = Schema:changeset(Data, Params),
     normalize_one_data_result(do_update([Changeset], Schema)).
