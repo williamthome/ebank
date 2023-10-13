@@ -9,8 +9,8 @@
 
 parse_transform(Forms, _Options) ->
     case collect_attributes(Forms) of
-        {ok, #{model := Model, query := QueryFuns}} ->
-            case all_loaded(Model) of
+        {ok, #{schema := Schema, query := QueryFuns}} ->
+            case all_loaded(Schema) of
                 true ->
                     replace_schema_fun(QueryFuns, Forms);
                 false ->
@@ -27,13 +27,13 @@ parse_transform(Forms, _Options) ->
 %% INTERNAL FUNCTIONS
 %%----------------------------------------------------------------------
 
-all_loaded(Model) ->
+all_loaded(Schema) ->
     Deps = [ebank_modules],
     case ensure_modules_loaded(Deps) of
         true ->
             ebank_modules:all_loaded([
                 {ebank_qlc, [{query, 3}]},
-                {Model, [{schema, 0}]}
+                {Schema, [{schema, 0}]}
             ]);
         false ->
             false
@@ -48,7 +48,7 @@ collect_attributes(Forms) ->
     Deps = [parserl_trans, ebank_parse_transform],
     case ensure_modules_loaded(Deps) of
         true ->
-            {ok, ebank_parse_transform:collect_attributes([model, query], Forms)};
+            {ok, ebank_parse_transform:collect_attributes([schema, query], Forms)};
         false ->
             error
     end.

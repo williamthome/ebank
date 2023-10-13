@@ -10,17 +10,17 @@
 % @todo: escript that executes migrations.
 migrate(_Method = up, _Version = 1) ->
     Args = #{persist => ebank_env:get_db(persist, false)},
-    Models = ebank_env:get(models),
-    create_tables(Models, Args).
+    Schemas = ebank_env:get(schemas),
+    create_tables(Schemas, Args).
 
 %%----------------------------------------------------------------------
 %% INTERNAL FUNCTIONS
 %%----------------------------------------------------------------------
 
-create_tables([Model | Models], Args) ->
-    case ebank_repo:create_table(Args, Model) of
+create_tables([Schema | Schemas], Args) ->
+    case ebank_repo:create_table(Args, Schema) of
         ok ->
-            create_tables(Models, Args);
+            create_tables(Schemas, Args);
         {error, Reason} ->
             {error, Reason}
     end;

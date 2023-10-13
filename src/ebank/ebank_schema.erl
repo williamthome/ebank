@@ -29,10 +29,20 @@
 -opaque t() :: #schema{}.
 
 -type table() :: ebank_db:table().
--type fields() :: #{ field_name() := ebank_fields:t() }.
+-type fields() :: #{field_name() := ebank_schema_field:t()}.
 -type field_name() :: atom().
 -type changeset() :: changeset:t().
 -type data() :: map().
+
+%% Callbacks
+-optional_callbacks([]).
+
+-callback schema() -> t().
+
+-callback changeset(Data, Params) -> changeset()
+    when Data :: data()
+       , Params :: data()
+       .
 
 %%----------------------------------------------------------------------
 %% API FUNCTIONS
@@ -54,7 +64,7 @@ fields_name(Schema) ->
 
 indexed_fields_name(Schema) ->
     lists:filtermap(fun({Name, Field}) ->
-        case ebank_field:indexed(Field) of
+        case ebank_schema_field:indexed(Field) of
             true -> {true, Name};
             false -> false
         end
@@ -68,12 +78,12 @@ fields_index(Schema) ->
 
 fields_type(Schema) ->
     lists:foldl(fun({Name, Field}, Acc) ->
-        Acc#{Name => ebank_field:type(Field)}
+        Acc#{Name => ebank_schema_field:type(Field)}
     end, #{}, fields(Schema)).
 
 permitted_fields(Schema) ->
     lists:filtermap(fun({Name, Field}) ->
-        case ebank_field:permitted(Field) of
+        case ebank_schema_field:permitted(Field) of
             true -> {true, Name};
             false -> false
         end
@@ -81,7 +91,7 @@ permitted_fields(Schema) ->
 
 required_fields(Schema) ->
     lists:filtermap(fun({Name, Field}) ->
-        case ebank_field:required(Field) of
+        case ebank_schema_field:required(Field) of
             true -> {true, Name};
             false -> false
         end
@@ -92,7 +102,7 @@ field(Name, Schema) ->
     Field.
 
 field_index(Name, Schema) ->
-    ebank_field:index(field(Name, Schema)).
+    ebank_schema_field:index(field(Name, Schema)).
 
 get_field_value(Name, Record, Schema) ->
     ebank_records:get_value(field_index(Name, Schema) + 1, Record).
@@ -125,4 +135,4 @@ normalize_fields(Fields) ->
 
 normalize_field({Name, Args0}, Index) ->
     Args = Args0#{name => Name, index => Index},
-    {Name, ebank_field:new(Args)}.
+    {Name, ebank_schema_field:new(Args)}.

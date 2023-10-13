@@ -1,4 +1,12 @@
-[{<<"changeset">>,
-  {git,"https://github.com/williamthome/changeset",
-       {ref,"1517d9cda12ab8795e4ff81b4d310c39e2df7807"}},
-  0}].
+{"1.2.0",
+[{<<"parse_trans">>,{pkg,<<"parse_trans">>,<<"3.4.1">>},1},
+ {<<"parserl">>,
+  {git,"https://github.com/williamthome/parserl",
+       {ref,"02e2852c2c479534022ebfe7c7294d7e08d6b41b"}},
+  0}]}.
+[
+{pkg_hash,[
+ {<<"parse_trans">>, <<"6E6AA8167CB44CC8F39441D05193BE6E6F4E7C2946CB2759F015F8C56B76E5FF">>}]},
+{pkg_hash_ext,[
+ {<<"parse_trans">>, <<"620A406CE75DADA827B82E453C19CF06776BE266F5A67CFF34E1EF2CBB60E49A">>}]}
+].

@@ -1,16 +1,16 @@
--module(ebank_account_repo).
+-module(ebank_account_model).
 
 %% API functions
 -export([ insert/1, fetch/1, update/2 ]).
 
 %% Libs
--include("ebank_repo.hrl").
+-include("ebank_model.hrl").
 
 %% Macros
--define(MODEL, ebank_account).
+-define(SCHEMA, ebank_account_schema).
 
-%% Repo
--model(?MODEL).
+%% Schema
+-schema(?SCHEMA).
 -query([ q_fetch_by_id/0 ]).
 
 %%----------------------------------------------------------------------
@@ -18,7 +18,7 @@
 %%----------------------------------------------------------------------
 
 insert(Params) ->
-    ebank_repo:insert_one(Params, ?MODEL).
+    ebank_repo:insert_one(Params, ?SCHEMA).
 
 fetch(Id) ->
     ebank_repo:fetch_one(q_fetch_by_id(), #{
@@ -28,7 +28,7 @@ fetch(Id) ->
 update(Id, Params) ->
     case fetch(Id) of
         {ok, Record} ->
-            ebank_repo:update_one(Record, Params, ?MODEL);
+            ebank_repo:update_one(Record, Params, ?SCHEMA);
         {error, Reason} ->
             {error, Reason}
     end.
@@ -38,7 +38,7 @@ update(Id, Params) ->
 %%----------------------------------------------------------------------
 
 q_fetch_by_id() ->
-    Schema = ?MODEL:schema(),
+    Schema = ?SCHEMA:schema(),
     Table = ebank_schema:table(Schema),
     FieldsIndex = ebank_schema:fields_index(Schema),
     Indexes = #{Table => FieldsIndex},

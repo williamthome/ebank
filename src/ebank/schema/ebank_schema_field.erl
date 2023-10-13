@@ -1,4 +1,4 @@
--module(ebank_field).
+-module(ebank_schema_field).
 
 %% API functions
 -export([ new/1
@@ -24,9 +24,7 @@
 -opaque t() :: #field{}.
 
 -type name() :: atom().
-
 -type index() :: 2..16_777_215.
-
 -type type() :: changeset:type().
 
 %%----------------------------------------------------------------------

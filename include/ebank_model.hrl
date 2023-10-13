@@ -1,1 +1,1 @@
--compile({parse_transform, ebank_schema_transform}).
+-compile({parse_transform, ebank_dsl_transform}).

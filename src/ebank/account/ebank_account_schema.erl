@@ -1,12 +1,12 @@
--module(ebank_account).
+-module(ebank_account_schema).
 
--behaviour(ebank_model).
+-behaviour(ebank_schema).
 
-%% ebank_model callbacks
+%% ebank_schema callbacks
 -export([ schema/0, changeset/2 ]).
 
 %% Libs
--include("ebank_model.hrl").
+-include("ebank_schema.hrl").
 
 %%----------------------------------------------------------------------
 %% EBANK_MODEL CALLBACKS

@@ -145,7 +145,7 @@ field(_Config) ->
             , required => true
             },
     true =
-        ebank_field:new(Args) =:= ebank_schema:field(name, schema()),
+        ebank_schema_field:new(Args) =:= ebank_schema:field(name, schema()),
     ok.
 
 field_index(_Config) ->

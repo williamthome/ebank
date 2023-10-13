@@ -12,16 +12,16 @@
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
 
-create_table(Args, Model) ->
-    Schema = Model:schema(),
+create_table(Args, SchemaMod) ->
+    Schema = SchemaMod:schema(),
     ebank_db:create_table(Args#{
         name => ebank_schema:table(Schema),
         fields => ebank_schema:fields_name(Schema)
     }).
 
-insert_one(Params, Model) when is_map(Params) ->
-    Schema = Model:schema(),
-    Changeset = Model:changeset(#{}, Params),
+insert_one(Params, SchemaMod) when is_map(Params) ->
+    Schema = SchemaMod:schema(),
+    Changeset = Schema:changeset(#{}, Params),
     normalize_one_data_result(do_insert([Changeset], Schema)).
 
 fetch(Query, Bindings) ->
@@ -36,14 +36,14 @@ fetch(Query, Bindings) ->
 fetch_one(Query, Bindings) ->
     normalize_one_data_result(fetch(Query, Bindings)).
 
-update_one(Record, Params, Model) ->
-    Schema = Model:schema(),
+update_one(Record, Params, SchemaMod) ->
+    Schema = SchemaMod:schema(),
     FieldsIndex = ebank_schema:fields_index(Schema),
     IndexesName = maps:fold(fun(Name, Index, Acc) ->
         Acc#{Index => Name}
     end, #{}, FieldsIndex),
     Data = ebank_records:to_map(IndexesName, Record),
-    Changeset = Model:changeset(Data, Params),
+    Changeset = Schema:changeset(Data, Params),
     normalize_one_data_result(do_update([Changeset], Schema)).
 
 %%----------------------------------------------------------------------

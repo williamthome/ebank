@@ -25,8 +25,8 @@ EnvConfig = fun
             {crypto, #{
                 salt => "oZzuwZvsSHutZFBt7hmA4gcBH9rsByEY"
             }},
-            {models, [
-                ebank_account
+            {schemas, [
+                ebank_account_schema
             ]}
         ]}];
     (_) ->
@@ -55,8 +55,8 @@ EnvConfig = fun
                 salt => os:getenv( "EBANK_CRYPTO_SALT"
                                  , "oZzuwZvsSHutZFBt7hmA4gcBH9rsByEY" )
             }},
-            {models, [
-                ebank_account
+            {schemas, [
+                ebank_account_schema
             ]}
         ]}]
 end,
