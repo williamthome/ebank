@@ -17,6 +17,7 @@
         , set_field_value/4
         , changeset/3
         , changeset/4
+        , to_map/2
         , to_record/2
         ]).
 
@@ -127,6 +128,9 @@ changeset(Data, Params, Schema, Pipes) ->
     Permitted = permitted_fields(Schema),
     Changeset = changeset:cast({Data, Types}, Params, Permitted),
     changeset:pipe(Changeset, Pipes).
+
+to_map(Record, Schema) ->
+    ebank_records:to_map(Record, ebank_maps:invert(fields_index(Schema))).
 
 to_record(Map, Schema) ->
     ebank_records:from_map(Map, fields_name(Schema), table(Schema)).
