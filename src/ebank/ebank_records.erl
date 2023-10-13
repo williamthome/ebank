@@ -22,7 +22,7 @@ from_map(Params, FieldsName, RecordName) ->
         ]
     ).
 
-to_map(IndexesName, Record) ->
+to_map(Record, IndexesName) ->
     element(1, lists:foldl(fun(Val, {Acc, Index}) ->
         FieldName = maps:get(Index, IndexesName),
         {Acc#{FieldName => Val}, Index+1}
@@ -40,6 +40,6 @@ to_map_test() ->
     Expected = #{name => <<"Joe">>, age => 68},
     IndexesName = #{1 => name, 2 => age},
     Record = {user, <<"Joe">>, 68},
-    ?assertEqual(Expected, to_map(IndexesName, Record)).
+    ?assertEqual(Expected, to_map(Record, IndexesName)).
 
 -endif.

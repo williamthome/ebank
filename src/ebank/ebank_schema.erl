@@ -130,8 +130,8 @@ changeset(Data, Params, Schema, Pipes) ->
     Changeset = changeset:cast({Data, Types}, Params, Permitted),
     changeset:pipe(Changeset, Pipes).
 
-to_record(Params, Schema) ->
-    ebank_records:from_map(Params, fields_name(Schema), table(Schema)).
+to_record(Map, Schema) ->
+    ebank_records:from_map(Map, fields_name(Schema), table(Schema)).
 
 %%----------------------------------------------------------------------
 %% INTERNAL FUNCTIONS
