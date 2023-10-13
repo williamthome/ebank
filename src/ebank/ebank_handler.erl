@@ -3,12 +3,15 @@
 %% API functions
 -export([ handle/3 ]).
 
+%% Macros
+-define(ROUTER, (ebank_env:get_server(router))).
+
 %%----------------------------------------------------------------------
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
 
 handle(Method, Path, Req0) ->
-    {{Controller, Fun, Args}, Opts} = ebank_router:match(Method, Path),
+    {{Controller, Fun, Args}, Opts} = ?ROUTER:match(Method, Path),
     case resolve_opts(Opts, Req0) of
         {continue, Req} ->
             Controller:Fun(Args, Req);
