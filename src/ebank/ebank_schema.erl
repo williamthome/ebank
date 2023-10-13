@@ -140,6 +140,10 @@ normalize_fields(Fields) ->
         {normalize_field({Name, Args}, I), I+1}
     end, 1, Fields)).
 
-normalize_field({Name, Args0}, Index) ->
+normalize_field({Name, Args0}, Index) when is_map(Args0) ->
     Args = Args0#{name => Name, index => Index},
-    {Name, ebank_schema_field:new(Args)}.
+    {Name, ebank_schema_field:new(Args)};
+normalize_field({Name, {Type, Args0}}, Index) ->
+    Args1 = proplists:to_map(Args0),
+    Args = Args1#{type => Type},
+    normalize_field({Name, Args}, Index).
