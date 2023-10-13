@@ -10,12 +10,16 @@
 fetch(IdBin, Req0) ->
     case ebank_converter:binary_to_integer(IdBin) of
         {ok, Id} ->
-            % @todo: fetch data.
-            Req1 = ebank_server:set_json_body(#{
-                id => Id
-            }, Req0),
-            Req = ebank_server:set_status_code(200, Req1),
-            {ok, Req};
+            case ebank_account:fetch(Id) of
+                {ok, AccountRecord} ->
+                    Account = ebank_account:to_map(AccountRecord),
+                    {ok, Req1} = ebank_server:set_json_body(Account, Req0),
+                    Req = ebank_server:set_status_code(200, Req1),
+                    {ok, Req};
+                {error, enoent} ->
+                    Req = ebank_server:set_status_code(404, Req0),
+                    {ok, Req}
+            end;
         {error, badarg} ->
             Req = ebank_server:set_status_code(404, Req0),
             {ok, Req}
