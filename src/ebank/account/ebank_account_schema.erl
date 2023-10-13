@@ -8,7 +8,7 @@
 %% API functions
 -export([ to_map/1 ]).
 
-%% Schema
+%% Libs
 -include("ebank_schema.hrl").
 
 -schema(#{
@@ -23,7 +23,7 @@
 }).
 
 %%----------------------------------------------------------------------
-%% EBANK_MODEL CALLBACKS
+%% EBANK_SCHEMA CALLBACKS
 %%----------------------------------------------------------------------
 
 changeset(Data, Params) ->
