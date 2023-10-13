@@ -11,4 +11,18 @@
 migrate(_Method = up, _Version = 1) ->
     Args = #{persist => ebank_env:get_db(persist, false)},
     Models = ebank_env:get(models),
-    ebank_repo:create_tables(Args, Models).
+    create_tables(Models, Args).
+
+%%----------------------------------------------------------------------
+%% INTERNAL FUNCTIONS
+%%----------------------------------------------------------------------
+
+create_tables([Model | Models], Args) ->
+    case ebank_repo:create_table(Args, Model) of
+        ok ->
+            create_tables(Models, Args);
+        {error, Reason} ->
+            {error, Reason}
+    end;
+create_tables([], _) ->
+    ok.

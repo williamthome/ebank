@@ -1,8 +1,7 @@
 -module(ebank_repo).
 
 %% API functions
--export([ create_tables/2
-        , create_table/2
+-export([ create_table/2
         , insert_one/2
         , fetch/2
         , fetch_one/2
@@ -12,19 +11,6 @@
 %%----------------------------------------------------------------------
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
-
-create_tables(Args, Models) ->
-    do_create_tables(Models, Args).
-
-do_create_tables([Model | Models], Args) ->
-    case create_table(Args, Model) of
-        ok ->
-            do_create_tables(Models, Args);
-        {error, Reason} ->
-            {error, Reason}
-    end;
-do_create_tables([], _) ->
-    ok.
 
 create_table(Args, Model) ->
     Schema = Model:schema(),
