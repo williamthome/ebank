@@ -7,18 +7,22 @@
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
 
-parse_transform(Forms, _Options) ->
-    case all_loaded() of
-        true ->
-            case has_schema_fun(Forms) of
-                {true, Form} ->
-                    replace_schema_fun(Form, Forms);
+parse_transform(Forms0, _Options) ->
+    case collect_attributes(Forms0) of
+        {ok, #{schema := SchemaArgs}} ->
+            case all_loaded() of
+                true ->
+                    Forms1 = compile_schema(SchemaArgs, Forms0),
+                    Forms = ebank_parse_transform:remove_attribute(schema, Forms1),
+                    parserl_trans:restore(Forms);
                 false ->
-                    % @todo: emit a warning about no schema fun.
-                    Forms
+                    Forms0
             end;
-        false ->
-            Forms
+        {ok, _} ->
+            % @todo: emit a warning about missing attributes.
+            Forms0;
+        error ->
+            Forms0
     end.
 
 %%----------------------------------------------------------------------
@@ -26,7 +30,8 @@ parse_transform(Forms, _Options) ->
 %%----------------------------------------------------------------------
 
 all_loaded() ->
-    case ensure_modules_loaded([ebank_modules]) of
+    Deps = [parserl_trans, ebank_parse_transform, ebank_modules],
+    case ensure_modules_loaded(Deps) of
         true ->
             ebank_modules:all_loaded([
                 {ebank_schema, [{new, 1}]}
@@ -40,15 +45,17 @@ ensure_modules_loaded(Modules) ->
         code:ensure_loaded(Mod) =:= {module, Mod}
     end, Modules).
 
-has_schema_fun(Forms) ->
-    ebank_parse_transform:find_function(schema, 0, Forms).
+collect_attributes(Forms) ->
+    Deps = [parserl_trans, ebank_parse_transform],
+    case ensure_modules_loaded(Deps) of
+        true ->
+            {ok, ebank_parse_transform:collect_attributes([schema], Forms)};
+        false ->
+            error
+    end.
 
-replace_schema_fun(Form, Forms) ->
-    ebank_parse_transform:replace_function(schema, 0, compile(Form), Forms).
-
-compile({function, _, _, _, [Clause0]} = Form) ->
-    FBody = element(5, Clause0),
-    Schema = ebank_parse_transform:eval_form(FBody),
-    AST = [ebank_parse_transform:term_to_ast(Schema)],
-    Clause = setelement(5, Clause0, AST),
-    setelement(5, Form, [Clause]).
+compile_schema(Args, Forms) ->
+    Schema = ebank_schema:new(Args),
+    Fun = "schema() -> _@schema.",
+    Bindings = #{schema => Schema},
+    ebank_parse_transform:insert_function(Fun, Bindings, Forms, [export]).

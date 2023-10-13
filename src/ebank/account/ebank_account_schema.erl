@@ -3,45 +3,31 @@
 -behaviour(ebank_schema).
 
 %% ebank_schema callbacks
--export([ schema/0, changeset/2 ]).
+-export([ changeset/2 ]).
 
-%% Libs
+%% API functions
+-export([ to_map/1 ]).
+
+%% Schema
 -include("ebank_schema.hrl").
+
+-schema(#{
+    table => account,
+    fields => [
+        {id, {integer, [readonly]}},
+        {social_id, {binary, [required, indexed]}},
+        {name, {binary, [required]}},
+        {password, {binary, [required, redacted]}},
+        {created_at, {datetime, [readonly]}}
+    ]
+}).
 
 %%----------------------------------------------------------------------
 %% EBANK_MODEL CALLBACKS
 %%----------------------------------------------------------------------
 
-schema() ->
-    ebank_schema:new(#{
-        table => account,
-        fields => [
-            {id, #{
-                type => integer,
-                permitted => false
-            }},
-            {social_id, #{
-                type => binary,
-                required => true,
-                indexed => true
-            }},
-            {name, #{
-                type => binary,
-                required => true
-            }},
-            {password, #{
-                type => binary,
-                required => true
-            }},
-            {created_at, #{
-                type => datetime,
-                permitted => false
-            }}
-        ]
-    }).
-
 changeset(Data, Params) ->
-    Changeset = ebank_schema:changeset(Data, Params, schema()),
+    Changeset = ebank_schema:changeset(Data, Params, ?MODULE:schema()),
     case changeset:is_valid(Changeset) of
         true ->
             changeset:pipe(Changeset, [

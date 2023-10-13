@@ -1,4 +1,4 @@
--module(ebank_dsl_transform).
+-module(ebank_model_transform).
 
 %% API functions
 -export([ parse_transform/2 ]).
@@ -7,20 +7,24 @@
 %% API FUNCTIONS
 %%----------------------------------------------------------------------
 
-parse_transform(Forms, _Options) ->
-    case collect_attributes(Forms) of
-        {ok, #{schema := Schema, query := QueryFuns}} ->
+parse_transform(Forms0, _Options) ->
+    case collect_attributes(Forms0) of
+        {ok, #{model := ModelAttr}} ->
+            Schema = maps:get(schema, ModelAttr),
             case all_loaded(Schema) of
                 true ->
-                    replace_schema_fun(QueryFuns, Forms);
+                    QueryFuns = maps:get(queries, ModelAttr, []),
+                    Forms1 = compile_queries(Forms0, QueryFuns),
+                    Forms = ebank_parse_transform:remove_attribute(model, Forms1),
+                    parserl_trans:restore(Forms);
                 false ->
-                    Forms
+                    Forms0
             end;
         {ok, _} ->
             % @todo: emit a warning about missing attributes.
-            Forms;
+            Forms0;
         error ->
-            Forms
+            Forms0
     end.
 
 %%----------------------------------------------------------------------
@@ -48,24 +52,27 @@ collect_attributes(Forms) ->
     Deps = [parserl_trans, ebank_parse_transform],
     case ensure_modules_loaded(Deps) of
         true ->
-            {ok, ebank_parse_transform:collect_attributes([schema, query], Forms)};
+            {ok, ebank_parse_transform:collect_attributes([model], Forms)};
         false ->
             error
     end.
 
-replace_schema_fun(QueryFuns, Forms) ->
+compile_queries(Forms, QueryFuns) ->
     lists:foldl(fun({FName, FArity}, Acc) ->
-        case ebank_parse_transform:find_function(FName, FArity, Forms) of
-            {true, FForm} ->
-                ebank_parse_transform:replace_function(
-                    FName, FArity, compile(FForm), Acc
-                );
-            false ->
-                error({missing_query, FName, FArity})
-        end
+        replace_query_fun(FName, FArity, Acc)
     end, Forms, QueryFuns).
 
-compile({function, _, _, _, [Clause0]} = Form) ->
+replace_query_fun(FName, FArity, Forms) ->
+    case ebank_parse_transform:find_function(FName, FArity, Forms) of
+        {true, FForm} ->
+            ebank_parse_transform:replace_function(
+                FName, FArity, compile_query(FForm), Forms
+            );
+        false ->
+            error({missing_query, FName, FArity})
+    end.
+
+compile_query({function, _, _, _, [Clause0]} = Form) ->
     FBody = element(5, Clause0),
     Query = ebank_parse_transform:eval_form(FBody),
     Anno = element(2, Clause0),

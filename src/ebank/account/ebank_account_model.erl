@@ -3,15 +3,16 @@
 %% API functions
 -export([ insert/1, fetch/1, update/2 ]).
 
-%% Libs
--include("ebank_model.hrl").
-
 %% Macros
 -define(SCHEMA, ebank_account_schema).
 
-%% Schema
--schema(?SCHEMA).
--query([ q_fetch_by_id/0 ]).
+%% Model
+-include("ebank_model.hrl").
+
+-model(#{
+    schema => ?SCHEMA,
+    queries => [ q_fetch_by_id/0 ]
+}).
 
 %%----------------------------------------------------------------------
 %% API FUNCTIONS
