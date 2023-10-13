@@ -11,7 +11,9 @@ query(DB, Clauses, Indexes) ->
     [$[, query_body(DB, Clauses, Indexes), $]].
 
 compile(Query, Bindings) ->
-    qlc:string_to_handle(lists:flatten([Query, $.]), [], Bindings).
+    qlc:string_to_handle( lists:flatten([Query, $.])
+                        , _Opts = []
+                        , [{'Bindings', Bindings}] ).
 
 eval(Compiled) ->
     qlc:eval(Compiled).

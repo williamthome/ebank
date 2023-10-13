@@ -48,7 +48,7 @@ abort_transaction(Reason) ->
 
 % @todo: compile query via parse transform.
 read(Query, Bindings) ->
-    {ok, ebank_qlc:eval(ebank_qlc:compile(Query, [{'Bindings', Bindings}]))}.
+    {ok, ebank_qlc:eval(ebank_qlc:compile(Query, Bindings))}.
 
 write(Data, Table) ->
     normalize_result(mnesia:write(Table, Data, write)).

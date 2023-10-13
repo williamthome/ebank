@@ -16,4 +16,4 @@ query(Clauses, Indexes) ->
     %        just compiles the string and not the qlc QH.
     %        @see: ebank_db_adapter_mnesia:read/2
     %        @see: https://www.erlang.org/doc/man/qlc
-    % ebank_qlc:compile(Query, [{'Bindings', Bindings}]).
+    % ebank_qlc:compile(Query, Bindings).
