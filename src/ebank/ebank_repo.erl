@@ -40,7 +40,7 @@ update_one(Record, Params, SchemaMod) ->
     Schema = SchemaMod:schema(),
     IndexesName = ebank_maps:invert(ebank_schema:fields_index(Schema)),
     Data = ebank_records:to_map(IndexesName, Record),
-    Changeset = Schema:changeset(Data, Params),
+    Changeset = SchemaMod:changeset(Data, Params),
     normalize_one_data_result(do_update([Changeset], Schema)).
 
 %%----------------------------------------------------------------------

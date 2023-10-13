@@ -53,7 +53,7 @@ set_id(Changeset) ->
     end.
 
 hash_password(Changeset) ->
-    case changeset:find_changes(password, Changeset) of
+    case changeset:find_change(password, Changeset) of
         {ok, Password} ->
             Hash = ebank_crypto:strong_hash(Password),
             changeset:push_change(password, Hash, Changeset);
