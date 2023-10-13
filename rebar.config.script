@@ -75,12 +75,8 @@ application:set_env(EnvConfig(ENV)),
 
         % Third-party
 
-        {cowboy, { git, "https://github.com/ninenines/cowboy"
-                 , {tag, "2.10.0"}} },
-
-        {thoas, { git
-                , "https://github.com/lpil/thoas"
-                , {tag, "v1.0.0"}} }
+        {cowboy, "2.10.0"},
+        {thoas, "1.1.1"}
     ]},
 
     {dialyzer, [

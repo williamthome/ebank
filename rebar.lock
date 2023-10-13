@@ -1,12 +1,22 @@
 {"1.2.0",
-[{<<"parse_trans">>,{pkg,<<"parse_trans">>,<<"3.4.1">>},1},
- {<<"parserl">>,
-  {git,"https://github.com/williamthome/parserl",
-       {ref,"02e2852c2c479534022ebfe7c7294d7e08d6b41b"}},
-  0}]}.
+[{<<"cowboy">>,{pkg,<<"cowboy">>,<<"2.10.0">>},0},
+ {<<"cowlib">>,
+  {git,"https://github.com/ninenines/cowlib",
+       {ref,"cc04201c1d0e1d5603cd1cde037ab729b192634c"}},
+  1},
+ {<<"parse_trans">>,{pkg,<<"parse_trans">>,<<"3.4.1">>},1},
+ {<<"ranch">>,
+  {git,"https://github.com/ninenines/ranch",
+       {ref,"a692f44567034dacf5efcaa24a24183788594eb7"}},
+  1},
+ {<<"thoas">>,{pkg,<<"thoas">>,<<"1.1.1">>},0}]}.
 [
 {pkg_hash,[
- {<<"parse_trans">>, <<"6E6AA8167CB44CC8F39441D05193BE6E6F4E7C2946CB2759F015F8C56B76E5FF">>}]},
+ {<<"cowboy">>, <<"FF9FFEFF91DAE4AE270DD975642997AFE2A1179D94B1887863E43F681A203E26">>},
+ {<<"parse_trans">>, <<"6E6AA8167CB44CC8F39441D05193BE6E6F4E7C2946CB2759F015F8C56B76E5FF">>},
+ {<<"thoas">>, <<"2422D4BDCAE142EF126AA3AC34F72C9E972D88D7665046A31DA014FDE0DF76F6">>}]},
 {pkg_hash_ext,[
- {<<"parse_trans">>, <<"620A406CE75DADA827B82E453C19CF06776BE266F5A67CFF34E1EF2CBB60E49A">>}]}
+ {<<"cowboy">>, <<"3AFDCCB7183CC6F143CB14D3CF51FA00E53DB9EC80CDCD525482F5E99BC41D6B">>},
+ {<<"parse_trans">>, <<"620A406CE75DADA827B82E453C19CF06776BE266F5A67CFF34E1EF2CBB60E49A">>},
+ {<<"thoas">>, <<"1FDD4122797075B3721903CDCDC6621DA5C458BB65D72C76898091DF71B17BBD">>}]}
 ].
