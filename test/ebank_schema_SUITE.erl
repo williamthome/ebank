@@ -121,7 +121,7 @@ schema() ->
             {name, #{
                 type => binary,
                 required => true,
-                permitted => true
+                readonly => false
             }}
         ]
     }).
@@ -141,7 +141,7 @@ field(_Config) ->
     Args = #{ name => name
             , index => #user.name - 1
             , type => binary
-            , permitted => true
+            , readonly => false
             , required => true
             },
     true =

@@ -10,6 +10,7 @@
         , fields_type/1
         , permitted_fields/1
         , required_fields/1
+        , redacted_fields/1
         , field/2
         , field_index/2
         , get_field_value/3
@@ -83,7 +84,7 @@ fields_type(Schema) ->
 
 permitted_fields(Schema) ->
     lists:filtermap(fun({Name, Field}) ->
-        case ebank_schema_field:permitted(Field) of
+        case not ebank_schema_field:readonly(Field) of
             true -> {true, Name};
             false -> false
         end
@@ -92,6 +93,14 @@ permitted_fields(Schema) ->
 required_fields(Schema) ->
     lists:filtermap(fun({Name, Field}) ->
         case ebank_schema_field:required(Field) of
+            true -> {true, Name};
+            false -> false
+        end
+    end, fields(Schema)).
+
+redacted_fields(Schema) ->
+    lists:filtermap(fun({Name, Field}) ->
+        case ebank_schema_field:redacted(Field) of
             true -> {true, Name};
             false -> false
         end

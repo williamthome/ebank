@@ -5,7 +5,7 @@
         , name/1
         , index/1
         , type/1
-        , permitted/1
+        , readonly/1
         , required/1
         , indexed/1
         ]).
@@ -16,7 +16,7 @@
 -record(field, { name :: atom()
                , index :: index()
                , type :: type()
-               , permitted :: boolean()
+               , readonly :: boolean()
                , required :: boolean()
                , indexed :: boolean()
                }).
@@ -35,7 +35,7 @@ new(Args) ->
     #field{ name = maps:get(name, Args)
           , index = maps:get(index, Args)
           , type = maps:get(type, Args)
-          , permitted = maps:get(permitted, Args, true)
+          , readonly = maps:get(readonly, Args, false)
           , required = maps:get(required, Args, false)
           , indexed = maps:get(indexed, Args, false)
           }.
@@ -49,8 +49,8 @@ index(#field{index = Index}) ->
 type(#field{type = Type}) ->
     Type.
 
-permitted(#field{permitted = Permitted}) ->
-    Permitted.
+readonly(#field{readonly = ReadOnly}) ->
+    ReadOnly.
 
 required(#field{required = Required}) ->
     Required.
