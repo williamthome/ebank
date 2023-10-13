@@ -3,8 +3,8 @@
 %% API functions
 -export([ create_table/2
         , insert_one/2
-        , fetch/2
-        , fetch_one/2
+        , fetch/3
+        , fetch_one/3
         , update_one/3
         ]).
 
@@ -21,20 +21,21 @@ create_table(Args, SchemaMod) ->
 
 insert_one(Params, SchemaMod) when is_map(Params) ->
     Schema = SchemaMod:schema(),
-    Changeset = Schema:changeset(#{}, Params),
+    Changeset = SchemaMod:changeset(#{}, Params),
     normalize_one_data_result(do_insert([Changeset], Schema)).
 
-fetch(Query, Bindings) ->
+fetch(Query, Bindings, SchemaMod) ->
     Fetch = fun() -> ebank_db:read(Query, Bindings) end,
     case ebank_db:with_transaction(Fetch) of
-        {ok, Data} ->
-            {ok, Data};
+        {ok, DataList} ->
+            Schema = SchemaMod:schema(),
+            {ok, normalize_data_list(DataList, Schema)};
         {error, Reason} ->
             {error, Reason}
     end.
 
-fetch_one(Query, Bindings) ->
-    normalize_one_data_result(fetch(Query, Bindings)).
+fetch_one(Query, Bindings, SchemaMod) ->
+    normalize_one_data_result(fetch(Query, Bindings, SchemaMod)).
 
 update_one(Record, Params, SchemaMod) ->
     Schema = SchemaMod:schema(),
@@ -107,3 +108,18 @@ do_update(Changesets, Schema) when is_list(Changesets) ->
         {error, Reason} ->
             {error, Reason}
     end.
+
+normalize_data_list(DataList, Schema) ->
+    case ebank_schema:redacted_fields(Schema) of
+        [] ->
+            DataList;
+        Redacted ->
+            lists:map(fun(Data) ->
+                replace_data(Redacted, Data, <<"***">>, Schema)
+            end, DataList)
+    end.
+
+replace_data(Fields, Data, Replacement, Schema) ->
+    lists:foldl(fun(Field, Acc) ->
+        ebank_schema:set_field_value(Field, Replacement, Acc, Schema)
+    end, Data, Fields).

@@ -22,9 +22,9 @@ insert(Params) ->
     ebank_repo:insert_one(Params, ?SCHEMA).
 
 fetch(Id) ->
-    ebank_repo:fetch_one(q_fetch_by_id(), #{
-        id => Id
-    }).
+    Query = q_fetch_by_id(),
+    Bindings = #{id => Id},
+    ebank_repo:fetch_one(Query, Bindings, ?SCHEMA).
 
 update(Id, Params) ->
     case fetch(Id) of
