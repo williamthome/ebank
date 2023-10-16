@@ -8,6 +8,8 @@
         , set_body/2
         , get_json_body/1
         , set_json_body/2
+        , upsert_request/3
+        , fetch_request/3
         ]).
 
 %% Macros
@@ -51,4 +53,39 @@ set_json_body(Term, Req0) ->
             {ok, Req};
         {error, Reason} ->
             {error, Reason}
+    end.
+
+upsert_request(Fun, Schema, Req0) ->
+    case ebank_server:get_json_body(Req0) of
+        {ok, {Params0, Req1}} ->
+            BinKeys = ebank_schema:fields_name_as_binary(Schema),
+            Params1 = maps:with(BinKeys, Params0),
+            Params = ebank_maps:binary_keys_to_existing_atom(Params1),
+            case Fun(Params) of
+                {ok, Record} ->
+                    Data = ebank_schema:to_map(Record, Schema),
+                    {ok, Req2} = ebank_server:set_json_body(Data, Req1),
+                    ebank_server:set_status_code(200, Req2);
+                {error, {changeset, Changeset}} ->
+                    Errors = lists:map(fun({Field, {Msg, _Meta}}) ->
+                        {Field, Msg}
+                    end, changeset:get_errors(Changeset)),
+                    {ok, Req2} = ebank_server:set_json_body(Errors, Req1),
+                    ebank_server:set_status_code(400, Req2);
+                % @todo: send error to log.
+                {error, _Reason} ->
+                    ebank_server:set_status_code(500, Req1)
+            end;
+        {error, badarg} ->
+            ebank_server:set_status_code(404, Req0)
+    end.
+
+fetch_request(FetchFun, Schema, Req0) ->
+    case FetchFun() of
+        {ok, Record} ->
+            Data = ebank_schema:to_map(Record, Schema),
+            {ok, Req1} = ebank_server:set_json_body(Data, Req0),
+            ebank_server:set_status_code(200, Req1);
+        {error, enoent} ->
+            ebank_server:set_status_code(404, Req0)
     end.
