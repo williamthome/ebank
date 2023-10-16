@@ -34,6 +34,7 @@ all_loaded() ->
     case ensure_modules_loaded(Deps) of
         true ->
             ebank_modules:all_loaded([
+                {ebank_schema_field, [{new, 1}]},
                 {ebank_schema, [{new, 1}]}
             ]);
         false ->
