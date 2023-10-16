@@ -31,6 +31,7 @@ changeset(Data, Params) ->
     case changeset:is_valid(Changeset) of
         true ->
             changeset:pipe(Changeset, [
+                fun check_unique/1,
                 fun set_id/1,
                 fun hash_password/1,
                 fun set_created_at/1
@@ -49,6 +50,24 @@ to_map(Account) ->
 %%----------------------------------------------------------------------
 %% INTERNAL FUNCTIONS
 %%----------------------------------------------------------------------
+
+check_unique(Changeset) ->
+    case changeset:find_change(social_id, Changeset) of
+        {ok, SocialId} ->
+            case ebank_account_model:exists(SocialId) of
+                {true, _Account} ->
+                    changeset:push_error({social_id,
+                        {<<"account with social_id already exists">>, #{
+                            validation => unique,
+                            social_id => SocialId
+                        }}
+                    }, Changeset);
+                false ->
+                    Changeset
+            end;
+        error ->
+            Changeset
+    end.
 
 set_id(Changeset) ->
     case changeset:get_data(id, Changeset, undefined) of

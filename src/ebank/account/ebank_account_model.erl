@@ -1,7 +1,7 @@
 -module(ebank_account_model).
 
 %% API functions
--export([ insert/1, fetch/1, update/2 ]).
+-export([ insert/1, exists/1, exists/2, fetch/1, update/2 ]).
 
 %% Libs
 -include("ebank_model.hrl").
@@ -19,7 +19,27 @@
 %%----------------------------------------------------------------------
 
 insert(Params) ->
-    ebank_repo:insert_one(Params, ?SCHEMA_MOD).
+    case ebank_repo:insert_one(Params, ?SCHEMA_MOD) of
+        {ok, Account} ->
+            {ok, ebank_repo:normalize_data(Account, ?SCHEMA_MOD)};
+        {error, Reason} ->
+            {error, Reason}
+    end.
+
+exists(SocialId) ->
+    exists(undefined, SocialId).
+
+exists(Id, SocialId) ->
+    Query = q_exists(),
+    Bindings = #{id => Id, social_id => SocialId},
+    case ebank_repo:fetch(Query, Bindings, ?SCHEMA_MOD) of
+        {ok, []} ->
+            false;
+        {ok, Accounts} ->
+            {true, Accounts};
+        {error, _} ->
+            false
+    end.
 
 fetch(Id) ->
     case do_fetch_by_id(Id) of
@@ -31,10 +51,10 @@ fetch(Id) ->
 
 update(Id, Params) ->
     case do_fetch_by_id(Id) of
-        {ok, Account} ->
-            case ebank_repo:update_one(Account, Params, ?SCHEMA_MOD) of
-                {ok, UpdatedAccount} ->
-                    {ok, ebank_repo:normalize_data(UpdatedAccount, ?SCHEMA_MOD)};
+        {ok, Data} ->
+            case ebank_repo:update_one(Data, Params, ?SCHEMA_MOD) of
+                {ok, Account} ->
+                    {ok, ebank_repo:normalize_data(Account, ?SCHEMA_MOD)};
                 {error, Reason} ->
                     {error, Reason}
             end;
@@ -57,4 +77,15 @@ q_fetch_by_id() ->
     FieldsIndex = ebank_schema:fields_index(Schema),
     Indexes = #{Table => FieldsIndex},
     Clauses = [{{Table, id}, '=:=', '@id'}],
+    ebank_dsl:query(Clauses, Indexes).
+
+q_exists() ->
+    Schema = ?SCHEMA_MOD:schema(),
+    Table = ebank_schema:table(Schema),
+    FieldsIndex = ebank_schema:fields_index(Schema),
+    Indexes = #{Table => FieldsIndex},
+    Clauses = [{'orelse', [
+        {{Table, id}, '=:=', '@id'},
+        {{Table, social_id}, '=:=', '@social_id'}
+    ]}],
     ebank_dsl:query(Clauses, Indexes).
