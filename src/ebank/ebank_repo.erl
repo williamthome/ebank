@@ -58,21 +58,22 @@ normalize_one_data_result({error, Reason}) ->
 do_insert(Changesets, Schema) ->
     Table = ebank_schema:table(Schema),
     Insert = fun() ->
-        {ok, lists:map(fun(Changeset) ->
+        DataList = lists:map(fun(Changeset) ->
             case changeset:is_valid(Changeset) of
                 true ->
                     Changes = changeset:get_changes(Changeset),
                     Record = ebank_schema:to_record(Changes, Schema),
                     case ebank_db:write(Record, Table) of
                         ok ->
-                            Changeset;
+                            Record;
                         {error, Reason} ->
                             ebank_db:abort_transaction({error, Reason})
                     end;
                 false ->
                     ebank_db:abort_transaction({error, {changeset, Changeset}})
             end
-        end, Changesets)}
+        end, Changesets),
+        {ok, normalize_data_list(DataList, Schema)}
     end,
     case ebank_db:with_transaction(Insert) of
         {ok, DataList} ->
@@ -84,7 +85,7 @@ do_insert(Changesets, Schema) ->
 do_update(Changesets, Schema) when is_list(Changesets) ->
     Table = ebank_schema:table(Schema),
     Update = fun() ->
-        {ok, lists:map(fun(Changeset) ->
+        DataList = lists:map(fun(Changeset) ->
             case changeset:is_valid(Changeset) of
                 true ->
                     Changes = changeset:get_changes(Changeset),
@@ -93,14 +94,15 @@ do_update(Changesets, Schema) when is_list(Changesets) ->
                     Record = ebank_schema:to_record(NewData, Schema),
                     case ebank_db:write(Record, Table) of
                         ok ->
-                            Changeset;
+                            Record;
                         {error, Reason} ->
                             ebank_db:abort_transaction({error, Reason})
                     end;
                 false ->
                     ebank_db:abort_transaction({error, {changeset, Changeset}})
             end
-        end, Changesets)}
+        end, Changesets),
+        {ok, normalize_data_list(DataList, Schema)}
     end,
     case ebank_db:with_transaction(Update) of
         {ok, DataList} ->

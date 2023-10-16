@@ -5,6 +5,7 @@
         , table/1
         , fields/1
         , fields_name/1
+        , fields_name_as_binary/1
         , indexed_fields_name/1
         , fields_index/1
         , fields_type/1
@@ -61,6 +62,9 @@ fields(#schema{fields = Fields}) ->
 
 fields_name(Schema) ->
     lists:map(fun({Name, _}) -> Name end, fields(Schema)).
+
+fields_name_as_binary(Schema) ->
+    lists:map(fun atom_to_binary/1, fields_name(Schema)).
 
 indexed_fields_name(Schema) ->
     lists:filtermap(fun({Name, Field}) ->
