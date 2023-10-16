@@ -11,7 +11,7 @@
 
 -model(#{
     schema => ?SCHEMA_MOD,
-    queries => [ q_fetch_by_id/0 ]
+    queries => [ q_fetch_by_id/0, q_exists/0 ]
 }).
 
 %%----------------------------------------------------------------------
