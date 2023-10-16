@@ -22,14 +22,22 @@ insert(Params) ->
     ebank_repo:insert_one(Params, ?SCHEMA_MOD).
 
 fetch(Id) ->
-    Query = q_fetch_by_id(),
-    Bindings = #{id => Id},
-    ebank_repo:fetch_one(Query, Bindings, ?SCHEMA_MOD).
+    case do_fetch_by_id(Id) of
+        {ok, Account} ->
+            {ok, ebank_repo:normalize_data(Account, ?SCHEMA_MOD)};
+        {error, Reason} ->
+            {error, Reason}
+    end.
 
 update(Id, Params) ->
-    case fetch(Id) of
-        {ok, Record} ->
-            ebank_repo:update_one(Record, Params, ?SCHEMA_MOD);
+    case do_fetch_by_id(Id) of
+        {ok, Account} ->
+            case ebank_repo:update_one(Account, Params, ?SCHEMA_MOD) of
+                {ok, UpdatedAccount} ->
+                    {ok, ebank_repo:normalize_data(UpdatedAccount, ?SCHEMA_MOD)};
+                {error, Reason} ->
+                    {error, Reason}
+            end;
         {error, Reason} ->
             {error, Reason}
     end.
@@ -37,6 +45,11 @@ update(Id, Params) ->
 %%----------------------------------------------------------------------
 %% INTERNAL FUNCTIONS
 %%----------------------------------------------------------------------
+
+do_fetch_by_id(Id) ->
+    Query = q_fetch_by_id(),
+    Bindings = #{id => Id},
+    ebank_repo:fetch_one(Query, Bindings, ?SCHEMA_MOD).
 
 q_fetch_by_id() ->
     Schema = ?SCHEMA_MOD:schema(),
