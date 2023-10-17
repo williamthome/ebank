@@ -8,7 +8,7 @@ Be reliable, have no bugs, clean code, be scalable, and use the minor third-part
 
 ## Project structure
 
-The project is structured to have domain and business logic separated from what it exposes to the world, also has adapters to plug third-party libraries and not have a direct dependency on them.\
+The project is structured to have domain and business logic separated from what it exposes to the world, also has adapters to plug third-party libraries and not have a direct dependency on them.
 I really enjoy how the [Elixir](https://elixir-lang.org/) code is structured, so some concepts and directory structures are based on Elixir libraries or applications.
 
 ## Directory structure
@@ -30,7 +30,7 @@ I really enjoy how the [Elixir](https://elixir-lang.org/) code is structured, so
 
 ## Data validation
 
-This application uses `changeset`, an Erlang library created and maintained by me. It provides an interface based on the [Elixir/Ecto changeset](https://hexdocs.pm/ecto/Ecto.Changeset.html) library.\
+This application uses `changeset`, an Erlang library created and maintained by me. It provides an interface based on the [Elixir/Ecto changeset](https://hexdocs.pm/ecto/Ecto.Changeset.html) library.
 A changeset is required to manipulate any data in the database, in this way, any data is validated before persists.
 
 ## Database
@@ -48,10 +48,53 @@ The current database used is [mnesia](https://www.erlang.org/doc/man/mnesia.html
 
 Mnesia works really well, it's reliable, scalable, and fits great to this simple project.
 
+## Query
+
+The query system is provided via `DSL` (Domain Specific Language), where Erlang code is compiled into the database syntax. The syntax expects a list of tuples with this format: `{{Table, Field}, Operator, Value}`.
+
+- The `Table` and the `Field` are atoms defined in the schema (see [metaprogramming](#metaprogramming]));
+- The `Operator` is any [Erlang operators](https://www.erlang.org/doc/reference_manual/expressions.html#term-comparisons), like `=:=`, `=/=`, `>`, `<`, etc;
+- The `Value` is any Erlang term or, if it is an atom starting with `@`, it will be considered as a variable that can be defined at the runtime, e.g. `@foo`.
+
+They can be linked using `orelse` and `andalso`, and to resolve the variables a map with the index of each field of each table evolved in the query is required, e.g. `#{table_a => #{foo => 1}, table_b => #{bar => 1, baz => 2}}`, e.g.:
+
+
+```erlang
+Table = mytable,
+Indexes = #{mytable => #{foo => 1, bar => 2, baz => 3}},
+Clauses=[{'andalso', [
+    {{Table, foo}, '=:=', <<"bar">>}, % <- static
+    {'orelse', [
+        {{Table, bar}, '=/=', '@baz'}, % <- variable 'baz'
+        {{Table, baz}, '>=', 0} % <- static
+    ]}
+]}],
+Query = ebank_dsl:query(Clauses, Indexes),
+ebank_db:read(Query, #{baz => the_baz_value}).
+```
+
+This project uses [qlc](https://www.erlang.org/doc/man/qlc) to resolve `mnesia` queries, so the output is a [list comprehension](https://www.erlang.org/docs/23/programming_examples/list_comprehensions.html):
+
+```erlang
+[ Mytable || Mytable <- mnesia:table(mytable)
+, ( element(2, Mytable) =:= <<"bar">>
+    andalso ( element(3, Mytable) =/= maps:get(baz, Bindings)
+              orelse element(4, Mytable) >= 0 )
+  )
+]
+```
+
+To illustrate, the result of the query above in `PostgreSQL` should be:
+
+```sql
+WHERE mytable.foo = 'bar'
+  AND ( mytable.bar != $1 OR mytable.baz >= 0 )
+```
+
 ## Metaprogramming
 
-This project use `parse_transform` to do [metaprogramming](https://www.erlang-factory.com/static/upload/media/1434462166791692seancribbseuc2015.pdf).\
-The reason behind that is to simplify the code and make it more scalable, readable, and easy to maintain.\
+This project use `parse_transform` to do [metaprogramming](https://www.erlang-factory.com/static/upload/media/1434462166791692seancribbseuc2015.pdf).
+The reason behind that is to simplify the code and make it more scalable, readable, and easy to maintain.
 
 Currently, the project contains two modules that provide metaprogramming:
 
@@ -85,7 +128,7 @@ _NOTE: An Erlang helper library called [parserl](https://github.com/williamthome
 
 ## What it offers
 
-The `make prod` command in the root folder starts the application in production mode, `make dev` to start in developer mode, or `make daemon` to start in developer mode and start a hot code reloading.\
+The `make prod` command in the root folder starts the application in production mode, `make dev` to start in developer mode, or `make daemon` to start in developer mode and start a hot code reloading.
 The command starts a server at the `8080` port and these routes are exposed:
 
 - `[POST] /accounts`: create an account if all parameters are valid and only if no one with the desired `social_id` exists;
