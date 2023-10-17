@@ -126,7 +126,7 @@ _NOTE: An Erlang helper library called [parserl](https://github.com/williamthome
 - [Cowboy](https://github.com/ninenines/cowboy): HTTP server;
 - [Thoas](https://github.com/lpil/thoas): JSON parser.
 
-## What it offers
+## Commands
 
 The `make prod` command in the root folder starts the application in production mode, `make dev` to start in developer mode, or `make daemon` to start in developer mode and start a hot code reloading.
 The command starts a server at the `8080` port and these routes are exposed:
@@ -139,7 +139,7 @@ The command starts a server at the `8080` port and these routes are exposed:
 
 This is an under-development application. Any change can occur without any notice. There are a lot of things to do and improve.
 
-## TODOs:
+## TODO:
 
 - [ ] Create a table called `transactions` where accounts can share money;
 - [ ] Create a table called `tokens` or `sessions` where the user can log in and perform updates and transactions;
